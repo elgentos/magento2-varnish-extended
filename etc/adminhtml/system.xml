@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="system">
+            <group id="full_page_cache">
+                <group id="varnish">
+                    <field id="tracking_parameters" type="text" translate="label comment" sortOrder="31" showInDefault="1">
+                        <label>Tracking Parameters</label>
+                        <comment>Specify tracking parameters to strip off of incoming requests to increase hit rate. This is not applied automatically! Read the README of the Elgentos_VarnishExtended extension on GitHub; https://github.com/elgentos/magento2-varnish-extended.</comment>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

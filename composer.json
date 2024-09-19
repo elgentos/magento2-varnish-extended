@@ -1,0 +1,18 @@
+{
+  "name": "elgentos/module-varnish-extended",
+  "version": "1.0.0",
+  "description": "This extension extends the built-in Varnish functionalities",
+  "type": "magento2-module",
+  "require": {
+    "magento/framework": ">=103.0.7",
+    "magento/module-page-cache": "*"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Elgentos\\VarnishExtended\\": ""
+    }
+  }
+}
