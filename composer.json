@@ -1,6 +1,5 @@
 {
-  "name": "elgentos/module-varnish-extended",
-  "version": "1.0.0",
+  "name": "elgentos/magento2-varnish-extended",
   "description": "This extension extends the built-in Varnish functionalities",
   "type": "magento2-module",
   "require": {
