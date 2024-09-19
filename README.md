@@ -17,7 +17,7 @@ cp vendor/magento/module-page-cache/etc/varnish6.vcl custom-varnish6.vcl
 
 Or use the custom optimized VCL as explained in the subsection "Custom optimized VCL" of this readme. 
 
-Now replace the relevant part:
+Now replace the relevant part with this part, which includes the placeholder:
 
 ```
     # Remove all marketing get parameters to minimize the cache objects
