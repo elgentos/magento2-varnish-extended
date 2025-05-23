@@ -24,7 +24,7 @@ class Config extends PageCacheConfig
         \Magento\Framework\App\Cache\StateInterface $cacheState,
         \Magento\Framework\Module\Dir\Reader $reader,
         \Magento\PageCache\Model\Varnish\VclGeneratorFactory $vclGeneratorFactory,
-        \Magento\Framework\Serialize\Serializer\Json $serializer = null
+        ?\Magento\Framework\Serialize\Serializer\Json $serializer = null
     ) {
         parent::__construct(
             $readFactory,
