@@ -1,10 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace Elgentos\VarnishExtended\Plugin;
 
-use Elgentos\VarnishExtended\Model\Config;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\PageCache\Model\Varnish\VclGenerator;
 
 /**
@@ -12,7 +11,7 @@ use Magento\PageCache\Model\Varnish\VclGenerator;
  */
 class AddReplacementsPlugin
 {
-    public function __construct(private readonly Config $config)
+    public function __construct(private readonly ScopeConfigInterface $scopeConfig)
     {
     }
 
@@ -39,7 +38,12 @@ class AddReplacementsPlugin
 
     protected function getReplacements(): array {
         return [
-            '/* {{ tracking_parameters }} */' => $this->config->getTrackingParameters(),
+            '/* {{ tracking_parameters }} */' => $this->getTrackingParameters(),
         ];
+    }
+
+    protected function getTrackingParameters(): string
+    {
+        return $this->scopeConfig->getValue('system/full_page_cache/varnish/tracking_parameters');
     }
 }

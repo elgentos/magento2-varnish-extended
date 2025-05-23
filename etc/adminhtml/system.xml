@@ -17,6 +17,12 @@
                             <field id="caching_application">1</field>
                         </depends>
                     </field>
+
+                    <field id="use_xkey_vmod" type="select" translate="label comment" sortOrder="35" showInDefault="1">
+                        <label>Use xkey VMOD</label>
+                        <comment><![CDATA[Varnish xkey vmod is installed. See <a target="_blank" href="https://github.com/varnish/varnish-modules/blob/master/src/vmod_xkey.vcc">Varnish VMOD xkey</a>.]]></comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
                 </group>
             </group>
         </section>
