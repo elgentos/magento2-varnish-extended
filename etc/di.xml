@@ -4,4 +4,5 @@
     <type name="Magento\PageCache\Model\Varnish\VclGenerator">
         <plugin name="AddReplacements" type="Elgentos\VarnishExtended\Plugin\AddReplacementsPlugin"/>
     </type>
+    <preference for="Magento\PageCache\Console\Command\GenerateVclCommand" type="Elgentos\VarnishExtended\Console\Command\GenerateVclCommand"/>
 </config>

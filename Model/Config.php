@@ -16,4 +16,9 @@ class Config
     {
         return $this->scopeConfig->getValue('system/full_page_cache/varnish/tracking_parameters');
     }
+
+    public function getEnableBfcache(): string
+    {
+        return $this->scopeConfig->getValue('system/full_page_cache/varnish/enable_bfcache') ?? '1';
+    }
 }
