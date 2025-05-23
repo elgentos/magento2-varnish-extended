@@ -23,7 +23,7 @@
                         <comment>Use soft purging instead of hard purging. This requires XKey mod to be installed</comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                         <depends>
-                            <field id="system/full_page_cache/use_xkey_mod">1</field>
+                            <field id="system/full_page_cache/use_xkey_vmod">1</field>
                         </depends>
                     </field>
                 </group>
