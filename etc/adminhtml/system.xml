@@ -10,9 +10,21 @@
         <section id="system">
             <group id="full_page_cache">
                 <group id="varnish">
+                    <comment><![CDATA[<strong>Note:</strong> When changing these settings, these are <strong>not applied automatically</strong> to any currently loaded VCL! Read the README of the <a href="https://github.com/elgentos/magento2-varnish-extended" target="_new">elgentos/magento2-varnish-extended extension on GitHub</a>.]]></comment>
+                    <field id="grace_period">
+                        <comment>Specify grace period in seconds for config file generation. If field is empty default value 300 will be saved. This grace period will be used to serve cached content when the server is healthy. If the server is not healthy, cached content will be served for 1 day before failing.</comment>
+                    </field>
+                    <field id="enable_bfcache" type="select" translate="label comment" sortOrder="30" showInDefault="1">
+                        <label>Enable Back/forward cache</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment><![CDATA[Enable Back/forward cache functionality. See <a href="https://web.dev/articles/bfcache" target="_new">web.dev</a> for more info on bfcache.]]></comment>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
                     <field id="tracking_parameters" type="text" translate="label comment" sortOrder="31" showInDefault="1">
                         <label>Tracking Parameters</label>
-                        <comment>Specify tracking parameters to strip off of incoming requests to increase hit rate. This is not applied automatically! Read the README of the Elgentos_VarnishExtended extension on GitHub; https://github.com/elgentos/magento2-varnish-extended.</comment>
+                        <comment><![CDATA[Specify tracking parameters to strip off of incoming requests to increase hit rate. See the <a href="https://github.com/mpchadwick/tracking-query-params-registry" target="_new">tracking query parameters registry</a> for a list of known parameters.]]></comment>
                         <depends>
                             <field id="caching_application">1</field>
                         </depends>
