@@ -17,6 +17,12 @@
                             <field id="caching_application">1</field>
                         </depends>
                     </field>
+
+                    <field id="use_soft_purging" type="select" translate="label comment" sortOrder="40" showInDefault="1">
+                        <label>Use Soft Purging</label>
+                        <comment>Use soft purging instead of hard purging. This requires XKey mod to be installed</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
                 </group>
             </group>
         </section>
