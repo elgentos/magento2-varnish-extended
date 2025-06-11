@@ -1,0 +1,48 @@
+varnishtest "Testing whether /health_check.php requests bypass the cache"
+
+barrier b1 cond 2
+
+server s1 {
+    # Probe request
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+    close
+    barrier b1 sync
+    accept
+
+    # Probe request explicitly called
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+} -start
+
+# Generate VCL
+shell {
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash" -start
+
+# Wait for probe
+barrier b1 sync
+
+logexpect l1 -v v1 -g request {
+    expect * 1001 ReqUrl ^/health_check\.php$
+    expect * 1001 VCL_return ^pass$
+    expect * 1001 VCL_call ^PASS$
+} -start
+
+
+client c1 {
+    # Initial request
+    txreq -url "/health_check.php"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
+} -run
+
+logexpect l1 -wait
