@@ -177,6 +177,14 @@ sub vcl_recv {
         return (pass);
     }
 
+{{for item in bypass_routes}}
+    # Bypass {{var item.route}}
+    if (req.url ~ "{{var item.route}}") {
+        return (pass);
+    }
+
+{{/for}}
+
     return (hash);
 }
 

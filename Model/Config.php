@@ -34,6 +34,8 @@ class Config extends PageCacheConfig
 
     public const XML_PATH_VARNISH_PASS_ON_COOKIE_PRESENCE = 'system/full_page_cache/varnish/pass_on_cookie_presence';
 
+    public const XML_PATH_VARNISH_BYPASS_ROUTES = 'system/full_page_cache/varnish/bypass_routes';
+
     public function __construct(
         ReadFactory $readFactory,
         ScopeConfigInterface $scopeConfig,
@@ -131,5 +133,10 @@ class Config extends PageCacheConfig
     public function getEnableStaticCache(): bool
     {
         return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_STATIC_CACHE);
+    }
+
+    public function getBypassRoutes() : array
+    {
+        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_BYPASS_ROUTES);
     }
 }
