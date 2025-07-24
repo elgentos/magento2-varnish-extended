@@ -137,6 +137,15 @@ class Config extends PageCacheConfig
 
     public function getBypassRoutes() : array
     {
-        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_BYPASS_ROUTES);
+        $routes = (string)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_BYPASS_ROUTES);
+
+        if (!json_decode($routes)) {
+            return [];
+        }
+
+        $routes = array_map(function ($param) {
+            return ["route" => $param['param']];
+        }, is_array($routes) ? $routes : json_decode($routes, true));
+        return $routes;
     }
 }
