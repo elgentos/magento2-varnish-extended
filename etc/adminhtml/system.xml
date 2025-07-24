@@ -67,8 +67,8 @@
                     </field>
                 <field id="bypass_routes" type="text" translate="label comment" sortOrder="37" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Bypass Routes</label>
-                    <comment><![CDATA[TBD]]></comment>
-                    <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\TrackingParameters</frontend_model>
+                    <comment><![CDATA[Add some routes to bypass varnish, e.g. /foobar]]></comment>
+                    <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\BypassRoutes</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                     <depends>
                         <field id="caching_application">1</field>
