@@ -4,9 +4,12 @@
         <section id="system">
             <group id="full_page_cache">
                 <group id="varnish">
-                    <comment><![CDATA[<strong>Note:</strong> When changing these settings, these are <strong>not applied automatically</strong> to any currently loaded VCL! Read the README of the <a href="https://github.com/elgentos/magento2-varnish-extended" target="_new">elgentos/magento2-varnish-extended extension on GitHub</a>.]]></comment>
+                    <comment>
+                        <![CDATA[<strong>Note:</strong> When changing these settings, these are <strong>not applied automatically</strong> to any currently loaded VCL! Read the README of the <a href="https://github.com/elgentos/magento2-varnish-extended" target="_new">elgentos/magento2-varnish-extended extension on GitHub</a>.]]></comment>
                     <field id="grace_period">
-                        <comment>Specify grace period in seconds for config file generation. If field is empty default value 300 will be saved. This grace period will be used to serve cached content when the server is healthy. If the server is not healthy, cached content will be served for 1 day before failing.</comment>
+                        <comment>Specify grace period in seconds for config file generation. If field is empty default value 300 will be saved. This grace period will be used to serve cached content when the server is healthy. If the server
+                            is not healthy, cached content will be served for 1 day before failing.
+                        </comment>
                     </field>
                     <field id="enable_bfcache" type="select" translate="label comment" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Enable Back/forward cache</label>
@@ -35,7 +38,8 @@
 
                     <field id="tracking_parameters" type="text" translate="label comment" sortOrder="33" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Tracking Parameters</label>
-                        <comment><![CDATA[Specify tracking parameters to strip off of incoming requests to increase hit rate. See the <a href="https://github.com/mpchadwick/tracking-query-params-registry" target="_new">tracking query parameters registry</a> for a list of known parameters.]]></comment>
+                        <comment>
+                            <![CDATA[Specify tracking parameters to strip off of incoming requests to increase hit rate. See the <a href="https://github.com/mpchadwick/tracking-query-params-registry" target="_new">tracking query parameters registry</a> for a list of known parameters.]]></comment>
                         <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\TrackingParameters</frontend_model>
                         <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
                         <depends>
@@ -56,7 +60,7 @@
                         <label>Use Xkey vmod</label>
                         <comment><![CDATA[Varnish Xkey vmod is installed. See <a target="_blank" href="https://github.com/varnish/varnish-modules/blob/master/src/vmod_xkey.vcc">Varnish VMOD xkey</a>.]]></comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                  </field>
+                    </field>
                     <field id="use_soft_purging" type="select" translate="label comment" sortOrder="36" showInDefault="1">
                         <label>Use soft purging</label>
                         <comment>Use soft purging instead of hard purging. This requires Xkey vmod to be installed</comment>
@@ -65,15 +69,24 @@
                             <field id="system/full_page_cache/varnish/use_xkey_vmod">1</field>
                         </depends>
                     </field>
-                <field id="bypass_routes" type="text" translate="label comment" sortOrder="37" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Bypass Routes</label>
-                    <comment><![CDATA[Add some routes to bypass varnish, e.g. /foobar]]></comment>
-                    <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\BypassRoutes</frontend_model>
-                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
-                    <depends>
-                        <field id="caching_application">1</field>
-                    </depends>
-                </field>
+                    <field id="bypass_routes" type="text" translate="label comment" sortOrder="37" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Bypass Routes</label>
+                        <comment><![CDATA[Add some routes to bypass varnish, e.g. /foobar]]></comment>
+                        <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\BypassRoutes</frontend_model>
+                        <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
+                    <field id="cachable_status_codes" type="text" translate="label comment" sortOrder="38" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Cachable status codes</label>
+                        <comment><![CDATA[This list defines all status codes which should be cached. Everything else won't be cached]]></comment>
+                        <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\StatusCodes</frontend_model>
+                        <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
 
                 </group>
             </group>

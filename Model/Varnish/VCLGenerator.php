@@ -55,7 +55,8 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             'use_soft_purging' => (int) $this->varnishExtendedConfig->getUseSoftPurging(),
             'pass_on_cookie_presence' => $this->varnishExtendedConfig->getPassOnCookiePresence(),
             'design_exceptions_code' => $this->getRegexForDesignExceptions(),
-            'bypass_routes' => $this->varnishExtendedConfig->getBypassRoutes()//[ [ "route" => "a" ], [ "route" => "b"]]
+            'bypass_routes' => $this->varnishExtendedConfig->getBypassRoutes(),
+            'status_codes' => $this->varnishExtendedConfig->getCachableStatusCodes()
         ];
         return $res;
     }

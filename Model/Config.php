@@ -16,34 +16,27 @@ use Magento\Store\Model\ScopeInterface;
 
 class Config extends PageCacheConfig
 {
+    public const XML_PATH_VARNISH_ENABLE_BFCACHE = 'system/full_page_cache/varnish/enable_bfcache';
+    public const XML_PATH_VARNISH_ENABLE_MEDIA_CACHE = 'system/full_page_cache/varnish/enable_media_cache';
+    public const XML_PATH_VARNISH_ENABLE_STATIC_CACHE = 'system/full_page_cache/varnish/enable_static_cache';
+    public const XML_PATH_VARNISH_TRACKING_PARAMETERS = 'system/full_page_cache/varnish/tracking_parameters';
+    public const XML_PATH_VARNISH_USE_XKEY_VMOD = 'system/full_page_cache/varnish/use_xkey_vmod';
+    public const XML_PATH_VARNISH_USE_SOFT_PURGING = 'system/full_page_cache/varnish/use_soft_purging';
+    public const XML_PATH_VARNISH_PASS_ON_COOKIE_PRESENCE = 'system/full_page_cache/varnish/pass_on_cookie_presence';
+    public const XML_PATH_VARNISH_BYPASS_ROUTES = 'system/full_page_cache/varnish/bypass_routes';
+    public const XML_PATH_VARNISH_CACHABLE_STATUS_CODES = 'system/full_page_cache/varnish/cachable_status_codes';
     private ScopeConfigInterface $scopeConfig;
-
     private Json $serializer;
 
-    public const XML_PATH_VARNISH_ENABLE_BFCACHE = 'system/full_page_cache/varnish/enable_bfcache';
-
-    public const XML_PATH_VARNISH_ENABLE_MEDIA_CACHE = 'system/full_page_cache/varnish/enable_media_cache';
-
-    public const XML_PATH_VARNISH_ENABLE_STATIC_CACHE = 'system/full_page_cache/varnish/enable_static_cache';
-
-    public const XML_PATH_VARNISH_TRACKING_PARAMETERS = 'system/full_page_cache/varnish/tracking_parameters';
-
-    public const XML_PATH_VARNISH_USE_XKEY_VMOD = 'system/full_page_cache/varnish/use_xkey_vmod';
-
-    public const XML_PATH_VARNISH_USE_SOFT_PURGING = 'system/full_page_cache/varnish/use_soft_purging';
-
-    public const XML_PATH_VARNISH_PASS_ON_COOKIE_PRESENCE = 'system/full_page_cache/varnish/pass_on_cookie_presence';
-
-    public const XML_PATH_VARNISH_BYPASS_ROUTES = 'system/full_page_cache/varnish/bypass_routes';
-
     public function __construct(
-        ReadFactory $readFactory,
+        ReadFactory          $readFactory,
         ScopeConfigInterface $scopeConfig,
-        StateInterface $cacheState,
-        Reader $reader,
-        VclGeneratorFactory $vclGeneratorFactory,
-        Json $serializer
-    ) {
+        StateInterface       $cacheState,
+        Reader               $reader,
+        VclGeneratorFactory  $vclGeneratorFactory,
+        Json                 $serializer
+    )
+    {
         parent::__construct(
             $readFactory,
             $scopeConfig,
@@ -71,12 +64,12 @@ class Config extends PageCacheConfig
 
     public function getUseXkeyVmod(): bool
     {
-        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_USE_XKEY_VMOD);
+        return (bool)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_USE_XKEY_VMOD);
     }
 
     public function getUseSoftPurging(): bool
     {
-        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_USE_SOFT_PURGING);
+        return (bool)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_USE_SOFT_PURGING);
     }
 
     public function getPassOnCookiePresence(): array
@@ -86,7 +79,7 @@ class Config extends PageCacheConfig
 
     public function getEnableBfcache(): bool
     {
-        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_BFCACHE);
+        return (bool)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_BFCACHE);
     }
 
     public function getSslOffloadedHeader()
@@ -127,15 +120,15 @@ class Config extends PageCacheConfig
 
     public function getEnableMediaCache(): bool
     {
-        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_MEDIA_CACHE);
+        return (bool)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_MEDIA_CACHE);
     }
 
     public function getEnableStaticCache(): bool
     {
-        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_STATIC_CACHE);
+        return (bool)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_STATIC_CACHE);
     }
 
-    public function getBypassRoutes() : array
+    public function getBypassRoutes(): array
     {
         $routes = (string)$this->scopeConfig->getValue(static::XML_PATH_VARNISH_BYPASS_ROUTES);
 
@@ -147,5 +140,16 @@ class Config extends PageCacheConfig
             return ["route" => $param['param']];
         }, is_array($routes) ? $routes : json_decode($routes, true));
         return $routes;
+    }
+
+    public function getCachableStatusCodes(): array
+    {
+
+        $status_codes = $this->scopeConfig->getValue(static::XML_PATH_VARNISH_CACHABLE_STATUS_CODES);
+
+
+        return array_map(function ($param) {
+            return ["status_code" => $param['param']];
+        }, is_array($status_codes) ? $status_codes : json_decode($status_codes, true));
     }
 }
