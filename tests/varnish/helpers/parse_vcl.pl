@@ -24,7 +24,11 @@ my %defaults = (
     'COOKIE1_REGEX' => '^ADMIN',
     'COOKIE2_REGEX' => '^PHPSESSID',
     'TRACKING_PARAMETERS' => 'utm_source|utm_medium|utm_campaign|gclid|cx|ie|cof|siteurl',
-    'DESIGN_EXCEPTIONS_CODE' => 'if (req.url ~ "^/media/theme/") { hash_data("design1"); }'
+    'DESIGN_EXCEPTIONS_CODE' => 'if (req.url ~ "^/media/theme/") { hash_data("design1"); }',
+    'BYPASS_ROUTES' => '',
+    'STATUS_CODES' => '200 404',
+    '404_STATUS_CODE' => '404',
+    '200_STATUS_CODE' => '200'
 );
 
 # Set defaults only for missing environment variables
