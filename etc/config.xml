@@ -116,6 +116,7 @@
                     </tracking_parameters>
                     <use_xkey_vmod>0</use_xkey_vmod>
                     <use_soft_purging>0</use_soft_purging>
+                    <ip_forward_header>X-Forwarded-For</ip_forward_header>
                 </varnish>
             </full_page_cache>
         </system>

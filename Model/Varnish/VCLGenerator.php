@@ -54,7 +54,8 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             'use_xkey_vmod' => (int) $this->varnishExtendedConfig->getUseXkeyVmod(),
             'use_soft_purging' => (int) $this->varnishExtendedConfig->getUseSoftPurging(),
             'pass_on_cookie_presence' => $this->varnishExtendedConfig->getPassOnCookiePresence(),
-            'design_exceptions_code' => $this->getRegexForDesignExceptions()
+            'design_exceptions_code' => $this->getRegexForDesignExceptions(),
+            'ip_forward_header' => $this->varnishExtendedConfig->getIpForwardHeader()
         ];
     }
 

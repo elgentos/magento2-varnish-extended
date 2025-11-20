@@ -57,7 +57,7 @@ sub vcl_recv {
 
     # Allow cache purge via Ctrl-Shift-R or Cmd-Shift-R for IP's in purge ACL list
     if (req.http.pragma ~ "no-cache" || req.http.Cache-Control ~ "no-cache") {
-        if (client.ip ~ purge) {
+        if (std.ip(req.http.{{var ip_forward_header}}, client.ip) ~ purge) {
             set req.hash_always_miss = true;
         }
     }
@@ -67,7 +67,7 @@ sub vcl_recv {
     # The X-Magento-Tags-Pattern value is matched to the tags in the X-Magento-Tags header
     # If X-Magento-Tags-Pattern is not set, a URL-based purge is executed
     if (req.method == "PURGE") {
-        if (client.ip !~ purge) {
+        if (std.ip(req.http.{{var ip_forward_header}}, client.ip) !~ purge) {
             return (synth(405));
         }
 
