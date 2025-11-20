@@ -13,6 +13,7 @@ my %defaults = (
     'PORT' => $ENV{PORT} || $ENV{s1_port},
     'GRACE_PERIOD' => '300',
     'SSL_OFFLOADED_HEADER' => 'X-Forwarded-Proto',
+    'IP_FORWARD_HEADER' => 'X-Forwarded-For',
     'USE_XKEY_VMOD' => '1',
     'ENABLE_BFCACHE' => '1',
     'ENABLE_MEDIA_CACHE' => '1',
