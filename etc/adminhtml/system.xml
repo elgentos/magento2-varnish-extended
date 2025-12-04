@@ -65,6 +65,13 @@
                             <field id="system/full_page_cache/varnish/use_xkey_vmod">1</field>
                         </depends>
                     </field>
+                    <field id="ip_forward_header" type="text" translate="label comment" sortOrder="37" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>IP Forward Header</label>
+                        <comment><![CDATA[Header name for forwarded client IP address (e.g., X-Forwarded-For, X-Real-IP). Used for purge access control.]]></comment>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
                 </group>
             </group>
         </section>

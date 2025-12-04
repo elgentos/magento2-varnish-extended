@@ -144,6 +144,7 @@ class GenerateVclCommand extends MagentoGenerateVclCommand
                 'sslOffloadedHeader' => $this->varnishExtendedConfig->getSslOffloadedHeader(),
                 'trackingParameters' => $this->varnishExtendedConfig->getTrackingParameters(),
                 'designExceptions' => $this->varnishExtendedConfig->getDesignExceptions(),
+                'ipForwardHeader' => $this->varnishExtendedConfig->getIpForwardHeader(),
             ]);
             $vclGenerator = $this->vclGeneratorFactory->create($vclParameters);
             $vcl = $vclGenerator->generateVcl($varnishVersion, $inputFile);

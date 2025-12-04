@@ -1,0 +1,59 @@
+varnishtest "IP Forward Header allows purge from forwarded IP"
+
+barrier b1 cond 2
+
+server s1 {
+    # first request will be the probe, handle it and be on our way
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+    # the probe expects the connection to close
+    close
+    barrier b1 sync
+    accept
+
+    rxreq
+    expect req.url == "/"
+    expect req.method == "GET"
+    txresp
+
+    rxreq
+    expect req.url == "/"
+    expect req.method == "PURGE"
+    txresp
+} -start
+
+# Generate the VCL file based on included variables and write it to output.vcl
+# Set up ACL with a single whitelisted IP that is not the test client
+shell {
+    export ACCESS_LIST="whitelisted"
+    export WHITELISTED_IP="10.0.0.1"
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash" -start
+
+# make sure the probe request fired
+barrier b1 sync
+
+client c1 {
+    # First request to cache the page
+    txreq -method "GET" -url "/"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+
+    # Second request: PURGE without X-Forwarded-For header should fail (405)
+    # because client IP (127.0.0.1) is not whitelisted
+    txreq -method "PURGE" -url "/"
+    rxresp
+    expect resp.status == 405
+
+    # Third request: PURGE with X-Forwarded-For header should succeed
+    # because forwarded IP (10.0.0.1) is whitelisted
+    txreq -method "PURGE" -url "/" -hdr "X-Forwarded-For: 10.0.0.1"
+    rxresp
+    expect resp.status == 200
+} -run
