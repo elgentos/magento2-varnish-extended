@@ -40,7 +40,7 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
 
     public function getVariables(): array
     {
-        return [
+        $res = [
             'host' => $this->backendHost,
             'port' => $this->backendPort,
             'access_list' => $this->getTransformedAccessList(),
@@ -54,8 +54,11 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             'use_xkey_vmod' => (bool) $this->varnishExtendedConfig->getUseXkeyVmod(),
             'use_soft_purging' => (bool) $this->varnishExtendedConfig->getUseSoftPurging(),
             'pass_on_cookie_presence' => $this->varnishExtendedConfig->getPassOnCookiePresence(),
-            'design_exceptions_code' => $this->getRegexForDesignExceptions()
+            'design_exceptions_code' => $this->getRegexForDesignExceptions(),
+            'bypass_routes' => $this->varnishExtendedConfig->getBypassRoutes(),
+            'status_codes' => $this->varnishExtendedConfig->getCachableStatusCodes()
         ];
+        return $res;
     }
 
     /**

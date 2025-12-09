@@ -8,7 +8,7 @@ import std;
 import xkey;
 {{/if}}
 
-# The minimal Varnish version is 6.0
+# The minimal Varnish version is 7.0
 # For SSL offloading, pass the following header in your proxy server or load balancer: '{{var ssl_offloaded_header }}: https'
 
 backend default {

@@ -116,6 +116,10 @@
                     </tracking_parameters>
                     <use_xkey_vmod>0</use_xkey_vmod>
                     <use_soft_purging>0</use_soft_purging>
+                    <cachable_status_codes>
+                        <param_all_ok><param>200</param></param_all_ok>
+                        <param_not_found><param>404</param></param_not_found>
+                    </cachable_status_codes>
                 </varnish>
             </full_page_cache>
         </system>
