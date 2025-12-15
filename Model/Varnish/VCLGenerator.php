@@ -127,23 +127,22 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             return '';
         }
 
-        // Security: Prevent access to sensitive system files
-        // Block common sensitive directories
+        // Security: Prevent access to sensitive system directories
+        // Block common sensitive paths by checking the resolved real path
         $blockedPaths = [
             '/etc/passwd',
             '/etc/shadow',
-            '/root',
-            '/etc/ssh',
+            '/root/',
+            '/etc/ssh/',
+            '/proc/',
+            '/sys/',
         ];
 
         foreach ($blockedPaths as $blocked) {
-            if (strpos($realPath, $blocked) === 0) {
+            $blockedReal = realpath($blocked);
+            if ($blockedReal !== false && strpos($realPath, $blockedReal) === 0) {
                 return '';
             }
-        }
-
-        if (!file_exists($realPath)) {
-            return '';
         }
 
         if (!is_readable($realPath)) {
