@@ -12,6 +12,8 @@
             <argument name="notifications" xsi:type="array">
                 <item name="marketing-params"
                       xsi:type="object">Elgentos\VarnishExtended\Model\MarketingParameters\Notification</item>
+                <item name="purge-stats"
+                      xsi:type="object">Elgentos\VarnishExtended\Model\PurgeStatistics\Notification</item>
             </argument>
         </arguments>
     </type>

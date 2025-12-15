@@ -8,6 +8,7 @@ use Exception;
 use Generator;
 use Magento\CacheInvalidate\Model\SocketFactory;
 use Magento\Framework\Cache\InvalidateLogger;
+use Magento\Framework\FlagManager;
 use Magento\PageCache\Model\Cache\Server;
 use Laminas\Http\Client\Adapter\Socket;
 use Laminas\Uri\Uri;
@@ -29,6 +30,11 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
     private $logger;
 
     /**
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
      * Batch size of the purge request.
      *
      * Based on default Varnish 6 http_req_hdr_len size minus a 512 bytes margin for method,
@@ -45,6 +51,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
         SocketFactory $socketAdapterFactory,
         InvalidateLogger $logger,
         Config $varnishExtendedConfig,
+        FlagManager $flagManager,
         int $maxHeaderSize = 7680,
     ) {
         parent::__construct(
@@ -55,6 +62,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
         );
         $this->logger = $logger;
         $this->varnishExtendedConfig = $varnishExtendedConfig;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -70,16 +78,23 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
         }
 
         $successful = true;
+        $totalObjectsPurged = 0;
         $socketAdapter = $this->socketAdapterFactory->create();
         $servers = $this->cacheServer->getUris();
         $socketAdapter->setOptions(['timeout' => 10]);
 
         $formattedTagsChunks = $this->chunkTags($tags);
         foreach ($formattedTagsChunks as $formattedTagsChunk) {
-            if (!$this->sendPurgeRequestToServers($socketAdapter, $servers, $formattedTagsChunk)) {
+            $result = $this->sendPurgeRequestToServers($socketAdapter, $servers, $formattedTagsChunk);
+            if ($result === false) {
                 $successful = false;
+            } elseif (is_int($result)) {
+                $totalObjectsPurged += $result;
             }
         }
+
+        // Store purge statistics for admin notification
+        $this->storePurgeStatistics($totalObjectsPurged);
 
         return $successful;
     }
@@ -116,15 +131,17 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
      * @param Socket $socketAdapter
      * @param Uri[] $servers
      * @param string $formattedTagsChunk
-     * @return bool Return true if successful; otherwise return false
+     * @return bool|int Return number of purged objects on success, false on total failure
      */
-    private function sendPurgeRequestToServers(Socket $socketAdapter, array $servers, string $formattedTagsChunk): bool
+    private function sendPurgeRequestToServers(Socket $socketAdapter, array $servers, string $formattedTagsChunk): bool|int
     {
         $headers = [self::HEADER_X_MAGENTO_TAGS_PATTERN => $formattedTagsChunk];
         if ($this->varnishExtendedConfig->getUseSoftPurging()) {
             $headers[self::HEADER_X_MAGENTO_PURGE_SOFT] = 1;
         }
         $unresponsiveServerError = [];
+        $objectsPurged = 0;
+        
         foreach ($servers as $server) {
             $headers['Host'] = $server->getHost();
             try {
@@ -135,8 +152,14 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
                     '1.1',
                     $headers
                 );
-                $socketAdapter->read();
+                $response = $socketAdapter->read();
                 $socketAdapter->close();
+                
+                // Parse the response to extract the number of purged objects
+                $purgedCount = $this->parseVarnishResponse($response);
+                if ($purgedCount > 0) {
+                    $objectsPurged = max($objectsPurged, $purgedCount);
+                }
             } catch (Exception $e) {
                 $unresponsiveServerError[] = "Cache host: " . $server->getHost() . ":" . $server->getPort() .
                     "resulted in error message: " . $e->getMessage();
@@ -163,6 +186,42 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
         }
 
         $this->logger->execute(compact('servers', 'formattedTagsChunk'));
-        return true;
+        return $objectsPurged;
+    }
+
+    /**
+     * Parse Varnish response to extract number of purged objects
+     *
+     * @param string $response
+     * @return int
+     */
+    private function parseVarnishResponse(string $response): int
+    {
+        // Extract JSON body from HTTP response
+        // Expected format: { "invalidated": <number> }
+        if (preg_match('/\{[^}]*"invalidated":\s*(\d+)[^}]*\}/', $response, $matches)) {
+            return (int)$matches[1];
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Store purge statistics for admin notification
+     *
+     * @param int $objectsPurged
+     * @return void
+     */
+    private function storePurgeStatistics(int $objectsPurged): void
+    {
+        if ($objectsPurged > 0) {
+            $this->flagManager->saveFlag(
+                \Elgentos\VarnishExtended\Model\PurgeStatistics\Notification::VARNISH_PURGE_STATS,
+                [
+                    'objects_purged' => $objectsPurged,
+                    'timestamp' => time()
+                ]
+            );
+        }
     }
 }
