@@ -200,8 +200,10 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
     {
         // Extract JSON body from HTTP response
         // Expected format: { "invalidated": <number> }
-        // Split response into headers and body
-        $parts = explode("\r\n\r\n", $response, 2);
+        // Handle both \r\n\r\n and \n\n line endings
+        $response = str_replace("\r\n", "\n", $response);
+        $parts = explode("\n\n", $response, 2);
+        
         if (count($parts) < 2) {
             return 0;
         }
@@ -209,7 +211,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
         $body = trim($parts[1]);
         $data = json_decode($body, true);
         
-        if (json_last_error() === JSON_ERROR_NONE && isset($data['invalidated'])) {
+        if (json_last_error() === JSON_ERROR_NONE && is_array($data) && isset($data['invalidated'])) {
             return (int)$data['invalidated'];
         }
         

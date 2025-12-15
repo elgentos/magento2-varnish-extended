@@ -9,7 +9,6 @@ use Magento\Framework\Notification\MessageInterface;
 
 class Notification implements MessageInterface
 {
-
     public const VARNISH_PURGE_STATS = 'varnish-purge-stats';
 
     private ?array $cachedStats = null;
@@ -25,8 +24,7 @@ class Notification implements MessageInterface
 
     public function isDisplayed(): bool
     {
-        $stats = $this->getStats();
-        return $stats !== null && is_array($stats);
+        return $this->getStats() !== null;
     }
 
     public function getText(): string
