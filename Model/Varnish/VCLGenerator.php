@@ -122,15 +122,42 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             return '';
         }
 
-        if (!file_exists($filePath)) {
+        $realPath = realpath($filePath);
+        if ($realPath === false) {
             return '';
         }
 
-        if (!is_readable($filePath)) {
+        // Security: Prevent access to sensitive system files
+        // Block common sensitive directories
+        $blockedPaths = [
+            '/etc/passwd',
+            '/etc/shadow',
+            '/root',
+            '/etc/ssh',
+        ];
+
+        foreach ($blockedPaths as $blocked) {
+            if (strpos($realPath, $blocked) === 0) {
+                return '';
+            }
+        }
+
+        if (!file_exists($realPath)) {
             return '';
         }
 
-        $content = file_get_contents($filePath);
+        if (!is_readable($realPath)) {
+            return '';
+        }
+
+        // Security: Limit file size to 1MB to prevent memory exhaustion
+        $maxFileSize = 1024 * 1024; // 1MB
+        $fileSize = filesize($realPath);
+        if ($fileSize === false || $fileSize > $maxFileSize) {
+            return '';
+        }
+
+        $content = file_get_contents($realPath);
         return $content !== false ? $content : '';
     }
 }

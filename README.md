@@ -102,6 +102,8 @@ sub custom_security_check {
 ```
 
 **Important Notes:**
+- **Security**: File size is limited to 1MB to prevent memory issues. Access to common system directories (e.g., /etc/passwd, /root) is blocked.
+- Store your custom VCL files in your application directory (e.g., `app/etc/prepend.vcl`)
 - Avoid adding `return` statements in prepend files unless you want to override all core logic
 - Prepend files are ideal for: custom backends, ACLs, global variables
 - Append files are ideal for: helper subroutines, custom logic that can be called from main VCL
