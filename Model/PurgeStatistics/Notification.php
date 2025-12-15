@@ -70,6 +70,6 @@ class Notification implements MessageInterface
             $this->cachedStats = is_array($stats) ? $stats : [];
         }
         
-        return $this->cachedStats ?: null;
+        return empty($this->cachedStats) ? null : $this->cachedStats;
     }
 }

@@ -132,7 +132,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
      * @param Socket $socketAdapter
      * @param Uri[] $servers
      * @param string $formattedTagsChunk
-     * @return bool|int Return number of purged objects on success, false on total failure
+     * @return int|false Return number of purged objects on success, false on total failure
      */
     private function sendPurgeRequestToServers(Socket $socketAdapter, array $servers, string $formattedTagsChunk): bool|int
     {
