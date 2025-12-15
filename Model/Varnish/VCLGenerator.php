@@ -183,7 +183,7 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             // Administrators can check Varnish logs if VCL generation has issues
             return '';
         }
-        
+
         return $content;
     }
 
