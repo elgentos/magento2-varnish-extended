@@ -60,6 +60,56 @@ task('vcl:auto-apply', function () {
 
 Contrary to popular belief, loading & activating ('using') a new VCL does not purge the cache objects already in Varnish. However, the new VCL might change how future requests are processed, which could result in cached items being evicted sooner or fetched differently.
 
+## Custom VCL Prepend & Append
+
+You can include custom VCL snippets at the start and end of the generated VCL by configuring file paths in the admin panel:
+
+**Stores > Configuration > System > Full Page Cache > Varnish Configuration**
+- **Custom VCL Prepend File**: Absolute path to a VCL file to include after imports but before the backend definition
+- **Custom VCL Append File**: Absolute path to a VCL file to include at the end of the VCL
+
+### How VCL Subroutine Prepend/Append Works
+
+- Only one definition per VCL hook subroutine (e.g., `vcl_deliver`) is active in the final compiled VCL. Later definitions override earlier ones.
+- Use `return` to prevent fallthrough to builtin VCL logic.
+- Use prepend/append files to structure reusable logic (e.g., define shared sub blocks), but call them explicitly in the active `vcl_*` subroutine.
+- If composing VCLs via includes, make sure only one file defines a given `vcl_*` unless you understand the override order.
+- Use `varnishd -C -f composed.vcl` to inspect what actually gets compiled.
+
+### Example: Prepend File
+
+```vcl
+# prepend.vcl
+# Define custom backends or ACLs before the main VCL logic
+
+backend custom_api {
+    .host = "api.example.com";
+    .port = "8080";
+}
+```
+
+### Example: Append File
+
+```vcl
+# append.vcl
+# Define helper subroutines that can be called from the main VCL
+
+sub custom_security_check {
+    if (req.http.X-Custom-Header) {
+        # Custom security logic
+    }
+}
+```
+
+**Important Notes:**
+- **Security**: File size is limited to 1MB to prevent memory issues. Access to common system directories (e.g., /etc/passwd, /root) is blocked.
+- Store your custom VCL files in your application directory (e.g., `app/etc/prepend.vcl`)
+- Avoid adding `return` statements in prepend files unless you want to override all core logic
+- Prepend files are ideal for: custom backends, ACLs, global variables
+- Append files are ideal for: helper subroutines, custom logic that can be called from main VCL
+- Test your custom VCL thoroughly in a non-production environment first
+- Use `varnishd -C -f your.vcl` to validate the compiled VCL before deploying
+
 ## Compatibility
 
 Needs at least Magento 2.4.7 and Varnish 6.4.

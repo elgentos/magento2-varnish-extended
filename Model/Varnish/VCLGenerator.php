@@ -10,6 +10,28 @@ use Magento\PageCache\Model\VclTemplateLocatorInterface;
 
 class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
 {
+    /**
+     * Paths to sensitive system directories that should never be accessible
+     */
+    private const BLOCKED_PATHS = [
+        '/etc/passwd',
+        '/etc/shadow',
+        '/root',
+        '/etc/ssh',
+        '/proc',
+        '/sys',
+    ];
+
+    /**
+     * Maximum file size for custom VCL files (1MB)
+     */
+    private const MAX_FILE_SIZE = 1048576; // 1024 * 1024
+
+    /**
+     * @var array|null Cached resolved blocked paths
+     */
+    private static ?array $resolvedBlockedPaths = null;
+
     public function __construct(
         private readonly TemplateFactory $templateFactory,
         private readonly VclTemplateLocatorInterface $vclTemplateLocator,
@@ -54,7 +76,9 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             'use_xkey_vmod' => (bool) $this->varnishExtendedConfig->getUseXkeyVmod(),
             'use_soft_purging' => (bool) $this->varnishExtendedConfig->getUseSoftPurging(),
             'pass_on_cookie_presence' => $this->varnishExtendedConfig->getPassOnCookiePresence(),
-            'design_exceptions_code' => $this->getRegexForDesignExceptions()
+            'design_exceptions_code' => $this->getRegexForDesignExceptions(),
+            'custom_vcl_prepend' => $this->getCustomVclContent($this->varnishExtendedConfig->getCustomVclPrependFile()),
+            'custom_vcl_append' => $this->getCustomVclContent($this->varnishExtendedConfig->getCustomVclAppendFile()),
         ];
     }
 
@@ -106,5 +130,79 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             }
         }
         return $result;
+    }
+
+    /**
+     * Get custom VCL content from file
+     *
+     * @param string $filePath
+     * @return string
+     */
+    private function getCustomVclContent(string $filePath): string
+    {
+        if (empty($filePath)) {
+            return '';
+        }
+
+        $realPath = realpath($filePath);
+        if ($realPath === false) {
+            return '';
+        }
+
+        // Security: Prevent access to sensitive system directories
+        // Use cached resolved paths for performance
+        if (self::$resolvedBlockedPaths === null) {
+            self::$resolvedBlockedPaths = [];
+            foreach (self::BLOCKED_PATHS as $blocked) {
+                $blockedReal = realpath($blocked);
+                if ($blockedReal !== false) {
+                    self::$resolvedBlockedPaths[] = $blockedReal;
+                }
+            }
+        }
+
+        foreach (self::$resolvedBlockedPaths as $blockedReal) {
+            if ($this->isPathWithinBlockedDirectory($realPath, $blockedReal)) {
+                return '';
+            }
+        }
+
+        if (!is_readable($realPath)) {
+            return '';
+        }
+
+        // Security: Limit file size to prevent memory exhaustion
+        $fileSize = filesize($realPath);
+        if ($fileSize === false || $fileSize > self::MAX_FILE_SIZE) {
+            return '';
+        }
+
+        $content = file_get_contents($realPath);
+        if ($content === false) {
+            // Note: Silent failure is intentional for security reasons
+            // Administrators can check Varnish logs if VCL generation has issues
+            return '';
+        }
+
+        return $content;
+    }
+
+    /**
+     * Check if a path is within a blocked directory
+     *
+     * @param string $path The real path to check
+     * @param string $blockedPath The blocked directory path
+     * @return bool
+     */
+    private function isPathWithinBlockedDirectory(string $path, string $blockedPath): bool
+    {
+        if (strpos($path, $blockedPath) !== 0) {
+            return false;
+        }
+
+        // Path must be exactly the blocked path or start with blocked path + separator
+        return $path === $blockedPath || 
+               (strlen($path) > strlen($blockedPath) && 
+                $path[strlen($blockedPath)] === DIRECTORY_SEPARATOR);
     }
 }
