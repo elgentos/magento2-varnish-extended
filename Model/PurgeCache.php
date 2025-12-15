@@ -6,6 +6,7 @@ namespace Elgentos\VarnishExtended\Model;
 
 use Exception;
 use Generator;
+use Elgentos\VarnishExtended\Model\PurgeStatistics\Notification as PurgeStatsNotification;
 use Magento\CacheInvalidate\Model\SocketFactory;
 use Magento\Framework\Cache\InvalidateLogger;
 use Magento\Framework\FlagManager;
@@ -158,7 +159,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
                 // Parse the response to extract the number of purged objects
                 $purgedCount = $this->parseVarnishResponse($response);
                 if ($purgedCount > 0) {
-                    $objectsPurged = max($objectsPurged, $purgedCount);
+                    $objectsPurged += $purgedCount;
                 }
             } catch (Exception $e) {
                 $unresponsiveServerError[] = "Cache host: " . $server->getHost() . ":" . $server->getPort() .
@@ -199,8 +200,17 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
     {
         // Extract JSON body from HTTP response
         // Expected format: { "invalidated": <number> }
-        if (preg_match('/\{[^}]*"invalidated":\s*(\d+)[^}]*\}/', $response, $matches)) {
-            return (int)$matches[1];
+        // Split response into headers and body
+        $parts = explode("\r\n\r\n", $response, 2);
+        if (count($parts) < 2) {
+            return 0;
+        }
+        
+        $body = trim($parts[1]);
+        $data = json_decode($body, true);
+        
+        if (json_last_error() === JSON_ERROR_NONE && isset($data['invalidated'])) {
+            return (int)$data['invalidated'];
         }
         
         return 0;
@@ -216,7 +226,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
     {
         if ($objectsPurged > 0) {
             $this->flagManager->saveFlag(
-                \Elgentos\VarnishExtended\Model\PurgeStatistics\Notification::VARNISH_PURGE_STATS,
+                PurgeStatsNotification::VARNISH_PURGE_STATS,
                 [
                     'objects_purged' => $objectsPurged,
                     'timestamp' => time()

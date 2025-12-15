@@ -12,6 +12,8 @@ class Notification implements MessageInterface
 
     public const VARNISH_PURGE_STATS = 'varnish-purge-stats';
 
+    private ?array $cachedStats = null;
+
     public function __construct(
         private readonly FlagManager $flagManager,
     ) {}
@@ -23,13 +25,13 @@ class Notification implements MessageInterface
 
     public function isDisplayed(): bool
     {
-        $stats = $this->flagManager->getFlagData(self::VARNISH_PURGE_STATS);
+        $stats = $this->getStats();
         return $stats !== null && is_array($stats);
     }
 
     public function getText(): string
     {
-        $stats = $this->flagManager->getFlagData(self::VARNISH_PURGE_STATS);
+        $stats = $this->getStats();
         
         if (!is_array($stats)) {
             return '';
@@ -54,5 +56,20 @@ class Notification implements MessageInterface
     public function getSeverity(): int
     {
         return self::SEVERITY_NOTICE;
+    }
+
+    /**
+     * Get purge statistics from flag manager with caching
+     *
+     * @return array|null
+     */
+    private function getStats(): ?array
+    {
+        if ($this->cachedStats === null) {
+            $stats = $this->flagManager->getFlagData(self::VARNISH_PURGE_STATS);
+            $this->cachedStats = is_array($stats) ? $stats : [];
+        }
+        
+        return $this->cachedStats ?: null;
     }
 }
