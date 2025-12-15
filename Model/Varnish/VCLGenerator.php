@@ -54,7 +54,9 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             'use_xkey_vmod' => (bool) $this->varnishExtendedConfig->getUseXkeyVmod(),
             'use_soft_purging' => (bool) $this->varnishExtendedConfig->getUseSoftPurging(),
             'pass_on_cookie_presence' => $this->varnishExtendedConfig->getPassOnCookiePresence(),
-            'design_exceptions_code' => $this->getRegexForDesignExceptions()
+            'design_exceptions_code' => $this->getRegexForDesignExceptions(),
+            'custom_vcl_prepend' => $this->getCustomVclContent($this->varnishExtendedConfig->getCustomVclPrependFile()),
+            'custom_vcl_append' => $this->getCustomVclContent($this->varnishExtendedConfig->getCustomVclAppendFile()),
         ];
     }
 
@@ -106,5 +108,29 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             }
         }
         return $result;
+    }
+
+    /**
+     * Get custom VCL content from file
+     *
+     * @param string $filePath
+     * @return string
+     */
+    private function getCustomVclContent(string $filePath): string
+    {
+        if (empty($filePath)) {
+            return '';
+        }
+
+        if (!file_exists($filePath)) {
+            return '';
+        }
+
+        if (!is_readable($filePath)) {
+            return '';
+        }
+
+        $content = file_get_contents($filePath);
+        return $content !== false ? $content : '';
     }
 }

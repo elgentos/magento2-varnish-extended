@@ -65,6 +65,20 @@
                             <field id="system/full_page_cache/varnish/use_xkey_vmod">1</field>
                         </depends>
                     </field>
+                    <field id="custom_vcl_prepend_file" type="text" translate="label comment" sortOrder="37" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Custom VCL Prepend File</label>
+                        <comment><![CDATA[Absolute path to a custom VCL file to include at the start of the generated VCL. This file will be included before the main VCL logic. Use with caution - incorrect VCL can break your cache.]]></comment>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
+                    <field id="custom_vcl_append_file" type="text" translate="label comment" sortOrder="38" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Custom VCL Append File</label>
+                        <comment><![CDATA[Absolute path to a custom VCL file to include at the end of the generated VCL. This file will be included after the main VCL logic. Use with caution - incorrect VCL can break your cache.]]></comment>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
                 </group>
             </group>
         </section>

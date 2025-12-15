@@ -11,6 +11,8 @@ import xkey;
 # The minimal Varnish version is 6.0
 # For SSL offloading, pass the following header in your proxy server or load balancer: '{{var ssl_offloaded_header }}: https'
 
+{{var custom_vcl_prepend}}
+
 backend default {
     .host = "{{var host}}";
     .port = "{{var port}}";
@@ -315,3 +317,5 @@ sub vcl_synth {
         return(deliver);
     }
 }
+
+{{var custom_vcl_append}}
