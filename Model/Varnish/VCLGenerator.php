@@ -11,6 +11,18 @@ use Magento\PageCache\Model\VclTemplateLocatorInterface;
 class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
 {
     /**
+     * Paths to sensitive system directories that should never be accessible
+     */
+    private const BLOCKED_PATHS = [
+        '/etc/passwd',
+        '/etc/shadow',
+        '/root',
+        '/etc/ssh',
+        '/proc',
+        '/sys',
+    ];
+
+    /**
      * @var array|null Cached resolved blocked paths
      */
     private static ?array $resolvedBlockedPaths = null;
@@ -135,17 +147,8 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
         // Security: Prevent access to sensitive system directories
         // Use cached resolved paths for performance
         if (self::$resolvedBlockedPaths === null) {
-            $blockedPaths = [
-                '/etc/passwd',
-                '/etc/shadow',
-                '/root',
-                '/etc/ssh',
-                '/proc',
-                '/sys',
-            ];
-
             self::$resolvedBlockedPaths = [];
-            foreach ($blockedPaths as $blocked) {
+            foreach (self::BLOCKED_PATHS as $blocked) {
                 $blockedReal = realpath($blocked);
                 if ($blockedReal !== false) {
                     self::$resolvedBlockedPaths[] = $blockedReal;
@@ -154,8 +157,15 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
         }
 
         foreach (self::$resolvedBlockedPaths as $blockedReal) {
+            // Check if path is within blocked directory
+            // Use DIRECTORY_SEPARATOR to ensure we're checking actual directory boundaries
             if (strpos($realPath, $blockedReal) === 0) {
-                return '';
+                // Allow only if the path is exactly the blocked path or starts with blocked path + separator
+                if ($realPath === $blockedReal || 
+                    (strlen($realPath) > strlen($blockedReal) && 
+                     $realPath[strlen($blockedReal)] === DIRECTORY_SEPARATOR)) {
+                    return '';
+                }
             }
         }
 
@@ -171,6 +181,12 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
         }
 
         $content = file_get_contents($realPath);
-        return $content !== false ? $content : '';
+        if ($content === false) {
+            // Note: Silent failure is intentional for security reasons
+            // Administrators can check Varnish logs if VCL generation has issues
+            return '';
+        }
+        
+        return $content;
     }
 }
