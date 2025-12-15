@@ -23,6 +23,11 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
     ];
 
     /**
+     * Maximum file size for custom VCL files (1MB)
+     */
+    private const MAX_FILE_SIZE = 1048576; // 1024 * 1024
+
+    /**
      * @var array|null Cached resolved blocked paths
      */
     private static ?array $resolvedBlockedPaths = null;
@@ -157,15 +162,8 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
         }
 
         foreach (self::$resolvedBlockedPaths as $blockedReal) {
-            // Check if path is within blocked directory
-            // Use DIRECTORY_SEPARATOR to ensure we're checking actual directory boundaries
-            if (strpos($realPath, $blockedReal) === 0) {
-                // Allow only if the path is exactly the blocked path or starts with blocked path + separator
-                if ($realPath === $blockedReal || 
-                    (strlen($realPath) > strlen($blockedReal) && 
-                     $realPath[strlen($blockedReal)] === DIRECTORY_SEPARATOR)) {
-                    return '';
-                }
+            if ($this->isPathWithinBlockedDirectory($realPath, $blockedReal)) {
+                return '';
             }
         }
 
@@ -173,10 +171,9 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
             return '';
         }
 
-        // Security: Limit file size to 1MB to prevent memory exhaustion
-        $maxFileSize = 1024 * 1024; // 1MB
+        // Security: Limit file size to prevent memory exhaustion
         $fileSize = filesize($realPath);
-        if ($fileSize === false || $fileSize > $maxFileSize) {
+        if ($fileSize === false || $fileSize > self::MAX_FILE_SIZE) {
             return '';
         }
 
@@ -188,5 +185,24 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
         }
         
         return $content;
+    }
+
+    /**
+     * Check if a path is within a blocked directory
+     *
+     * @param string $path The real path to check
+     * @param string $blockedPath The blocked directory path
+     * @return bool
+     */
+    private function isPathWithinBlockedDirectory(string $path, string $blockedPath): bool
+    {
+        if (strpos($path, $blockedPath) !== 0) {
+            return false;
+        }
+
+        // Path must be exactly the blocked path or start with blocked path + separator
+        return $path === $blockedPath || 
+               (strlen($path) > strlen($blockedPath) && 
+                $path[strlen($blockedPath)] === DIRECTORY_SEPARATOR);
     }
 }
