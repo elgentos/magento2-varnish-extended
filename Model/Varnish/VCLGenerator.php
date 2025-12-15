@@ -10,6 +10,11 @@ use Magento\PageCache\Model\VclTemplateLocatorInterface;
 
 class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
 {
+    /**
+     * @var array|null Cached resolved blocked paths
+     */
+    private static ?array $resolvedBlockedPaths = null;
+
     public function __construct(
         private readonly TemplateFactory $templateFactory,
         private readonly VclTemplateLocatorInterface $vclTemplateLocator,
@@ -128,19 +133,28 @@ class VCLGenerator extends \Magento\PageCache\Model\Varnish\VclGenerator
         }
 
         // Security: Prevent access to sensitive system directories
-        // Block common sensitive paths by checking the resolved real path
-        $blockedPaths = [
-            '/etc/passwd',
-            '/etc/shadow',
-            '/root/',
-            '/etc/ssh/',
-            '/proc/',
-            '/sys/',
-        ];
+        // Use cached resolved paths for performance
+        if (self::$resolvedBlockedPaths === null) {
+            $blockedPaths = [
+                '/etc/passwd',
+                '/etc/shadow',
+                '/root',
+                '/etc/ssh',
+                '/proc',
+                '/sys',
+            ];
 
-        foreach ($blockedPaths as $blocked) {
-            $blockedReal = realpath($blocked);
-            if ($blockedReal !== false && strpos($realPath, $blockedReal) === 0) {
+            self::$resolvedBlockedPaths = [];
+            foreach ($blockedPaths as $blocked) {
+                $blockedReal = realpath($blocked);
+                if ($blockedReal !== false) {
+                    self::$resolvedBlockedPaths[] = $blockedReal;
+                }
+            }
+        }
+
+        foreach (self::$resolvedBlockedPaths as $blockedReal) {
+            if (strpos($realPath, $blockedReal) === 0) {
                 return '';
             }
         }
