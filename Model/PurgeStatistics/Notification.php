@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Elgentos\VarnishExtended\Model\PurgeStatistics;
 
-use Elgentos\VarnishExtended\Model\NotificationInterface;
 use Magento\Framework\FlagManager;
+use Magento\Framework\Notification\MessageInterface;
 
-class Notification implements NotificationInterface
+class Notification implements MessageInterface
 {
 
     public const VARNISH_PURGE_STATS = 'varnish-purge-stats';
@@ -16,8 +16,9 @@ class Notification implements NotificationInterface
         private readonly FlagManager $flagManager,
     ) {}
 
-    public function getIdentity()
+    public function getIdentity(): string
     {
+        return 'VARNISH_PURGE_STATS_NOTIFICATION';
     }
 
     public function isDisplayed(): bool
@@ -50,7 +51,7 @@ class Notification implements NotificationInterface
         return $message;
     }
 
-    public function getSeverity()
+    public function getSeverity(): int
     {
         return self::SEVERITY_NOTICE;
     }
