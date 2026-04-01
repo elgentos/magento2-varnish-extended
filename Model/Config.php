@@ -106,7 +106,7 @@ class Config extends PageCacheConfig
 
     public function getAccessList()
     {
-        $accessList = $this->_scopeConfig->getValue(static::XML_VARNISH_PAGECACHE_ACCESS_LIST);
+        $accessList = $this->scopeConfig->getValue(static::XML_VARNISH_PAGECACHE_ACCESS_LIST);
         return array_map('trim', explode(',', $accessList));
     }
 
