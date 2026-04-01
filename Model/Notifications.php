@@ -2,7 +2,7 @@
 
 namespace Elgentos\VarnishExtended\Model;
 
-use Elgentos\VarnishExtended\Model\Notifications\NotificationInterface;
+use Elgentos\VarnishExtended\Model\NotificationInterface;
 use Magento\Backend\Controller\Adminhtml\System;
 use Magento\Framework\AuthorizationInterface;
 use Magento\Framework\Escaper;
