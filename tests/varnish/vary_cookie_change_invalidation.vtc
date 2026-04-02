@@ -1,0 +1,134 @@
+varnishtest "X-Magento-Vary cookie change (e.g. currency/language switch) invalidates cached response"
+
+barrier b1 cond 2
+
+server s1 {
+    # Probe
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+    close
+    barrier b1 sync
+    accept
+
+    # Test 1: vary unchanged — cache normally
+    rxreq
+    expect req.url == "/test1"
+    txresp -hdr "Cache-Control: public, max-age=86400" \
+           -hdr "Set-Cookie: X-Magento-Vary=hash1; path=/; HttpOnly" \
+           -body "test1_response"
+
+    # Test 2a: vary changed (currency/language switch) — must not be cached
+    rxreq
+    expect req.url == "/test2"
+    txresp -hdr "Cache-Control: public, max-age=86400" \
+           -hdr "Set-Cookie: X-Magento-Vary=hash2; path=/; HttpOnly" \
+           -body "test2_old_vary"
+
+    # Test 2b: follow-up request with new vary value — cached from here
+    rxreq
+    expect req.url == "/test2"
+    txresp -hdr "Cache-Control: public, max-age=86400" \
+           -body "test2_new_vary"
+
+    # Test 3: no vary in request, backend sets one (first visit) — existing behaviour
+    rxreq
+    expect req.url == "/test3"
+    txresp -hdr "Cache-Control: public, max-age=86400" \
+           -hdr "Set-Cookie: X-Magento-Vary=hash1; path=/; HttpOnly" \
+           -body "test3_response"
+
+    # Test 4: vary in request, no Set-Cookie in response — normal caching unaffected
+    rxreq
+    expect req.url == "/test4"
+    txresp -hdr "Cache-Control: public, max-age=86400" \
+           -body "test4_response"
+} -start
+
+shell {
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash" -start
+
+barrier b1 sync
+
+client c1 {
+    # -----------------------------------------------------------------------
+    # Test 1: Vary cookie unchanged
+    # Request has hash1, backend responds with Set-Cookie hash1 (same value).
+    # Expected: response cached, Set-Cookie stripped.
+    # -----------------------------------------------------------------------
+    txreq -url "/test1" -hdr "Cookie: X-Magento-Vary=hash1"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test1_response"
+
+    txreq -url "/test1" -hdr "Cookie: X-Magento-Vary=hash1"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test1_response"
+
+    # -----------------------------------------------------------------------
+    # Test 2: Vary cookie changed (e.g. visitor switches currency or language)
+    # Request has hash1, backend responds with Set-Cookie hash2 (different).
+    # Expected: response is UNCACHEABLE, Set-Cookie passed through to browser
+    # so it receives the updated vary value.
+    # -----------------------------------------------------------------------
+    txreq -url "/test2" -hdr "Cookie: X-Magento-Vary=hash1"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
+    expect resp.http.Set-Cookie ~ "X-Magento-Vary=hash2"
+    expect resp.body == "test2_old_vary"
+
+    # Browser now sends hash2 — this should be a fresh MISS, then cached
+    txreq -url "/test2" -hdr "Cookie: X-Magento-Vary=hash2"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test2_new_vary"
+
+    txreq -url "/test2" -hdr "Cookie: X-Magento-Vary=hash2"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test2_new_vary"
+
+    # -----------------------------------------------------------------------
+    # Test 3: No vary in request, backend sets one (first-time visitor)
+    # cookie.isset("X-Magento-Vary") is false — existing behaviour unchanged.
+    # Expected: response cached, Set-Cookie stripped (same as before this change).
+    # -----------------------------------------------------------------------
+    txreq -url "/test3"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test3_response"
+
+    txreq -url "/test3"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test3_response"
+
+    # -----------------------------------------------------------------------
+    # Test 4: Vary in request, no Set-Cookie in response
+    # Backend does not issue a new X-Magento-Vary — condition does not trigger.
+    # Expected: normal caching, nothing changes.
+    # -----------------------------------------------------------------------
+    txreq -url "/test4" -hdr "Cookie: X-Magento-Vary=hash1"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test4_response"
+
+    txreq -url "/test4" -hdr "Cookie: X-Magento-Vary=hash1"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+    expect resp.http.Set-Cookie == <undef>
+    expect resp.body == "test4_response"
+} -run

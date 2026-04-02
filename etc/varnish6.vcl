@@ -276,7 +276,18 @@ sub vcl_backend_response {
     # Only for HTTP GET & HTTP HEAD requests
     # We remove the Set-Cookie header from the VCL response, because we want to keep
     # the objects in the cache anonymous.
+    # Exception: if X-Magento-Vary has changed (e.g. currency or language switch), the
+    # cached object is no longer valid for this visitor — mark it uncacheable so Varnish
+    # fetches a fresh copy rather than serving or storing stale personalised content.
     if (beresp.ttl > 0s && (bereq.method == "GET" || bereq.method == "HEAD")) {
+        if (bereq.http.Cookie ~ "X-Magento-Vary="
+            && beresp.http.Set-Cookie ~ "X-Magento-Vary="
+            && regsub(bereq.http.Cookie, "^(.*;\s*)?X-Magento-Vary=([^;]+)(;.*)?$", "\2")
+                != regsub(beresp.http.Set-Cookie, "^(.*;\s*)?X-Magento-Vary=([^;]+)(;.*)?$", "\2")) {
+            set beresp.ttl = 0s;
+            set beresp.uncacheable = true;
+            return (deliver);
+        }
         unset beresp.http.Set-Cookie;
     }
 }
