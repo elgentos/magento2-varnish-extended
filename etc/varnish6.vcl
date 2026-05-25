@@ -53,6 +53,7 @@ sub vcl_recv {
     # In case of an unhealthy backend, the original grace is used
     if (std.healthy(req.backend_hint)) {
         set req.grace = {{var grace_period}}s;
+        std.log("Grace period set to {{var grace_period}} seconds for healthy backend");
     }
 
     # Allow cache purge via Ctrl-Shift-R or Cmd-Shift-R for IP's in purge ACL list
