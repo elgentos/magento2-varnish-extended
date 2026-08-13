@@ -90,7 +90,7 @@ sub vcl_recv {
             }
             return (synth(200, req.http.n-gone));
         } elseif (req.http.X-Magento-Tags-Pattern) {
-            # replace "((^|,)cat_c(,|$))|((^|,)cat_p(,|$))" to be "cat_c cat_p"
+            # normalize regex-style tag patterns to a space-separated list, e.g. "cat_c cat_p"
             set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "[^a-zA-Z0-9_-]+" ," ");
             set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "(^ *)|( *$)" ,"");
             if (req.http.X-Magento-Purge-Soft) {
@@ -244,8 +244,10 @@ sub vcl_backend_response {
 
 {{if use_xkey_vmod}}
     if (beresp.http.X-Magento-Tags) {
-        # set space separated xkey with "all" tag, allowing for fast full purges
-        set beresp.http.XKey = regsuball(beresp.http.X-Magento-Tags, ",", " ") + " all";
+        # set normalized space separated xkey with "all" tag, allowing for fast full purges
+        set beresp.http.XKey = regsuball(beresp.http.X-Magento-Tags, "[^a-zA-Z0-9_-]+", " ");
+        set beresp.http.XKey = regsuball(beresp.http.XKey, "(^ *)|( *$)", "");
+        set beresp.http.XKey = beresp.http.XKey + " all";
         unset beresp.http.X-Magento-Tags;
     }
 {{/if}}
