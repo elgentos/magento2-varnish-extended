@@ -5,13 +5,30 @@ on:
     paths:
       - 'etc/varnish6.vcl'
       - 'tests/varnish/**'
-      - '.github/workflows/vcl-tests.yml'
+      - '.github/workflows/vcl_tests.yml'
 
 jobs:
   test:
+    name: Varnish 7.7
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run Varnish test
         working-directory: tests/varnish
-        run: make test
+        run: make test VARNISH_IMAGE=varnish:7.7
+
+  test-fresh:
+    # Informational: catches breakage on the newest Varnish release early,
+    # without blocking a PR when upstream changes something.
+    name: Varnish fresh (informational)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Varnish test
+        working-directory: tests/varnish
+        run: make test VARNISH_IMAGE=varnish:fresh
+
+# Varnish 6.0 is deliberately absent: the official varnish:6.0 image ships without
+# varnish-modules, so the template's `import cookie` fails to load there. Running the suite
+# on 6.0 needs an image with the vmods baked in - see the README.

@@ -64,6 +64,20 @@ Contrary to popular belief, loading & activating ('using') a new VCL does not pu
 
 Needs at least Magento 2.4.7 and Varnish 6.4.
 
+### Varnish 6 and 7
+
+This module ships a single VCL template, `etc/varnish6.vcl`. Despite the name it is `vcl 4.1`
+and contains no version-specific syntax, so the same file serves both Varnish 6 and Varnish 7.
+CI runs the full test suite against 7.7, plus the newest Varnish release as an informational job.
+
+`--export-version=6` and `--export-version=7` therefore produce the same VCL, and you can move
+your nodes from 6 to 7 without regenerating anything.
+
+The version does matter for *which file* Magento looks up. Version 7 resolves to the filename
+`varnish7.vcl`, which this module does not ship, so it used to fall through to Magento's stock
+`varnish7.vcl` - silently handing you the core VCL instead of this one. `VCLTemplateLocator` now
+maps both versions to the template in this module, so that no longer happens.
+
 If you run into your VCL being generated without curly braces inside `for` and `if` directives, please check if you haven't still applied patch MDVA-4344. If you're running a recent Magento version, this patch isn't needed and breaks generation of the VCL.
 
 ## Running the test suite
@@ -91,5 +105,17 @@ make test_single TEST=purge.vtc
 ```
 
 This will only run the tests inside the `purge.vtc` file, which is the equivalent of running `varnishtest purge.vtc`.
+
+Both targets default to Varnish 7.7. Pass `VARNISH_IMAGE` to test against another version, the
+same way CI does:
+
+```shell
+make test VARNISH_IMAGE=varnish:fresh
+make test_single TEST=purge.vtc VARNISH_IMAGE=varnish:fresh
+```
+
+Note that the official `varnish:6.0` image ships without varnish-modules, so the template's
+`import cookie` fails to load there and the suite cannot run. Testing on 6.0 requires an image
+with the vmods installed.
 
 More information about the `varnishtest` program can be found  on the [varnish-cache.org documentation site](https://varnish-cache.org/docs/trunk/reference/varnishtest.html). You will also find information on the [Varnish Test Case syntax](https://varnish-cache.org/docs/trunk/reference/vtc.html).
