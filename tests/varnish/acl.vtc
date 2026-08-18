@@ -25,17 +25,17 @@ barrier b1 sync
 
 client c1 {
     # test URL-based cache purge
-    txreq -method "PURGE" -url "/"
+    txreq -req "PURGE" -url "/"
     rxresp
     expect resp.status == 405
 
     # test tag-based invalidation
-    txreq -method "PURGE" -url "/"  -hdr "X-Magento-Tags-Pattern: ((^|,)cat_p_694(,|$))"
+    txreq -req "PURGE" -url "/"  -hdr "X-Magento-Tags-Pattern: ((^|,)cat_p_694(,|$))"
     rxresp
     expect resp.status == 405
 
     # test full cache purge
-    txreq -method "PURGE" -url "/"  -hdr "X-Magento-Tags-Pattern: .*"
+    txreq -req "PURGE" -url "/"  -hdr "X-Magento-Tags-Pattern: .*"
     rxresp
     expect resp.status == 405
 } -run

@@ -60,12 +60,12 @@ barrier b1 sync
 
 client c1 {
     # Initial request
-    txreq -url "/" -method "GET" -hdr "Context: req1"
+    txreq -url "/" -req "GET" -hdr "Context: req1"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # Second request hits the cache
-    txreq -url "/" -method "GET" -hdr "Context: req2"
+    txreq -url "/" -req "GET" -hdr "Context: req2"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 } -run
@@ -75,7 +75,7 @@ barrier b2 sync
 
 client c2 {
     # Grace will kick in to serve stale content, even when the backend is sick
-    txreq -url "/" -method "GET" -hdr "Context: req3"
+    txreq -url "/" -req "GET" -hdr "Context: req3"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT-GRACE"
 } -run

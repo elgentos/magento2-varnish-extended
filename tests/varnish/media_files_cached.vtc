@@ -38,21 +38,21 @@ barrier b1 sync
 
 client c1 {
     # First request for media file
-    txreq -method "GET" -url "/media/catalog/product/cache/1/image/265x265/beff4985b56e3afdbeabfc89641a4582/l/u/luma-yoga-jacket.jpg" -hdr "Host: example.com"
+    txreq -req "GET" -url "/media/catalog/product/cache/1/image/265x265/beff4985b56e3afdbeabfc89641a4582/l/u/luma-yoga-jacket.jpg" -hdr "Host: example.com"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.http.Content-Type == "image/jpeg"
     expect resp.body == "JPEG image data"
 
     # Second request for the same media file should be served from cache
-    txreq -method "GET" -url "/media/catalog/product/cache/1/image/265x265/beff4985b56e3afdbeabfc89641a4582/l/u/luma-yoga-jacket.jpg" -hdr "Host: example.com"
+    txreq -req "GET" -url "/media/catalog/product/cache/1/image/265x265/beff4985b56e3afdbeabfc89641a4582/l/u/luma-yoga-jacket.jpg" -hdr "Host: example.com"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.http.Content-Type == "image/jpeg"
     expect resp.body == "JPEG image data"
 
     # Request with cookie should still be cached for media files
-    txreq -method "GET" -url "/media/catalog/product/cache/1/image/265x265/beff4985b56e3afdbeabfc89641a4582/l/u/luma-yoga-jacket.jpg" -hdr "Host: example.com" -hdr "Cookie: PHPSESSID=123456789"
+    txreq -req "GET" -url "/media/catalog/product/cache/1/image/265x265/beff4985b56e3afdbeabfc89641a4582/l/u/luma-yoga-jacket.jpg" -hdr "Host: example.com" -hdr "Cookie: PHPSESSID=123456789"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.http.Content-Type == "image/jpeg"
