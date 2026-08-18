@@ -4,6 +4,7 @@
         <arguments>
             <argument name="messages" xsi:type="array">
                 <item name="varnish" xsi:type="string">Elgentos\VarnishExtended\Model\Notifications</item>
+                <item name="varnish_purge_stats" xsi:type="string">Elgentos\VarnishExtended\Model\PurgeStatistics\Notification</item>
             </argument>
         </arguments>
     </type>
