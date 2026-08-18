@@ -48,28 +48,28 @@ barrier b1 sync
 
 client c1 {
     # 200 OK response - first request (should be a MISS)
-    txreq -method "GET" -url "/status-200"
+    txreq -req "GET" -url "/status-200"
     rxresp
     expect resp.status == 200
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.body == "Status 200 response"
 
     # 200 OK response - second request (should be a HIT, backend does not handle this)
-    txreq -method "GET" -url "/status-200"
+    txreq -req "GET" -url "/status-200"
     rxresp
     expect resp.status == 200
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Status 200 response"
 
     # 404 Not Found response - first request (should be UNCACHEABLE when disabled)
-    txreq -method "GET" -url "/status-404"
+    txreq -req "GET" -url "/status-404"
     rxresp
     expect resp.status == 404
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Status 404 response"
 
     # 404 Not Found response - second request (should be UNCACHEABLE, new backend response)
-    txreq -method "GET" -url "/status-404"
+    txreq -req "GET" -url "/status-404"
     rxresp
     expect resp.status == 404
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"

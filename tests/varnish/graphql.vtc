@@ -88,77 +88,77 @@ varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash"
 barrier b1 sync
 
 client c1 {
-    txreq -method "GET" -url "/graphql"
+    txreq -req "GET" -url "/graphql"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/graphql"
+    txreq -req "GET" -url "/graphql"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 1234"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12345"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12345"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12346"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12346"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12345" \
         -hdr "Store: 1"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12345" \
         -hdr "Store: 1"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12345" \
         -hdr "Store: 1" \
         -hdr "Content-Currency: 1"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "X-Magento-Cache-Id: 12345" \
         -hdr "Store: 1" \
         -hdr "Content-Currency: 1"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "Authorization: Bearer 12345"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "Authorization: Bearer 12345" \
         -hdr "X-Magento-Cache-Id: 12345"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/graphql" \
+    txreq -req "GET" -url "/graphql" \
         -hdr "Authorization: Bearer 12345" \
         -hdr "X-Magento-Cache-Id: 12345"
     rxresp

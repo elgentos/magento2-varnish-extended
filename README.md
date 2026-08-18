@@ -68,7 +68,7 @@ Needs at least Magento 2.4.7 and Varnish 6.4.
 
 This module ships a single VCL template, `etc/varnish6.vcl`. Despite the name it is `vcl 4.1`
 and contains no version-specific syntax, so the same file serves both Varnish 6 and Varnish 7.
-CI runs the full test suite against 7.7, plus the newest Varnish release as an informational job.
+CI runs the test suite against 6.0 and 7.7, plus the newest Varnish release as an informational job.
 
 `--export-version=6` and `--export-version=7` therefore produce the same VCL, and you can move
 your nodes from 6 to 7 without regenerating anything.
@@ -114,8 +114,25 @@ make test VARNISH_IMAGE=varnish:fresh
 make test_single TEST=purge.vtc VARNISH_IMAGE=varnish:fresh
 ```
 
-Note that the official `varnish:6.0` image ships without varnish-modules, so the template's
-`import cookie` fails to load there and the suite cannot run. Testing on 6.0 requires an image
-with the vmods installed.
+### Testing on Varnish 6.0
+
+```shell
+make test_varnish60
+```
+
+This builds `Dockerfile.varnish60` first, because the official `varnish:6.0` image ships without
+varnish-modules: the template's `import cookie` cannot load there. No varnish-modules packages
+exist for 6.0 either, so the Dockerfile builds `cookie` and `xkey` from source against the
+matching `varnish-dev`.
+
+Three tests are skipped on 6.0, for reasons unrelated to the VCL - see `VTC_SKIP_60` in the
+Makefile:
+
+- `design_exceptions_code` and `vary_cookie` use logexpect's `fail` command, added after 6.0;
+- `invalid_req_method` asserts on `VCL_call PIPE`, which 6.0 groups under a different VSL
+  transaction. The request still pipes correctly there.
+
+Note that the `.vtc` files use `txreq -req` rather than the newer `-method` alias, so they parse
+on every version in the matrix.
 
 More information about the `varnishtest` program can be found  on the [varnish-cache.org documentation site](https://varnish-cache.org/docs/trunk/reference/varnishtest.html). You will also find information on the [Varnish Test Case syntax](https://varnish-cache.org/docs/trunk/reference/vtc.html).

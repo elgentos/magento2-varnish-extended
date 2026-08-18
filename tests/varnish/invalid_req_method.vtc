@@ -39,7 +39,7 @@ logexpect l1 -v v1 -g request {
 
 
 client c1 {
-    txreq -url "/" -method "TEST"
+    txreq -url "/" -req "TEST"
     rxresp
     expect resp.status == 200
 } -run

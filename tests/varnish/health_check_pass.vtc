@@ -46,25 +46,25 @@ barrier b1 sync
 
 client c1 {
     # Regular request to fill the cache
-    txreq -method "GET" -url "/regular-url"
+    txreq -req "GET" -url "/regular-url"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.body == "Regular response"
 
     # Verify cache hit for regular request
-    txreq -method "GET" -url "/regular-url"
+    txreq -req "GET" -url "/regular-url"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Regular response"
 
     # First health check request - should pass to backend
-    txreq -method "GET" -url "/health_check.php"
+    txreq -req "GET" -url "/health_check.php"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Health check response 1"
 
     # Second health check request - should also pass to backend
-    txreq -method "GET" -url "/health_check.php"
+    txreq -req "GET" -url "/health_check.php"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Health check response 2"
