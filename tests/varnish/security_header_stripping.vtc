@@ -1,0 +1,49 @@
+varnishtest "Security headers are stripped from incoming requests before reaching the backend"
+
+barrier b1 cond 2
+
+server s1 {
+    # Probe request
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+    close
+    barrier b1 sync
+    accept
+
+    rxreq
+    expect req.url == "/"
+
+    # Header injection headers must not reach the backend
+    expect req.http.X-Original-URL  == <undef>
+    expect req.http.X-Rewrite-URL   == <undef>
+    expect req.http.X-Forwarded-Host   == <undef>
+    expect req.http.X-Forwarded-Server == <undef>
+
+    # HTTPoxy header must not reach the backend
+    expect req.http.proxy == <undef>
+
+    txresp
+} -start
+
+shell {
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash" -start
+
+barrier b1 sync
+
+client c1 {
+    txreq -method "GET" -url "/" \
+        -hdr "X-Original-URL: /admin" \
+        -hdr "X-Rewrite-URL: /admin" \
+        -hdr "X-Forwarded-Host: evil.example.com" \
+        -hdr "X-Forwarded-Server: evil.example.com" \
+        -hdr "Proxy: http://evil.example.com"
+    rxresp
+    expect resp.status == 200
+} -run
