@@ -52,7 +52,7 @@ barrier b1 sync
 
 client c1 {
     # Request with multiple Cookie headers
-    txreq -method "GET" -url "/test-url" \
+    txreq -req "GET" -url "/test-url" \
           -hdr "Cookie: cookie1=value1" \
           -hdr "Cookie: cookie2=value2" \
           -hdr "Cookie: cookie3=value3"
@@ -61,13 +61,13 @@ client c1 {
     expect resp.body == "Response with collected cookies"
 
     # Request with PHPSESSID cookie - should trigger pass
-    txreq -method "GET" -url "/test-url" -hdr "Cookie: PHPSESSID=123456"
+    txreq -req "GET" -url "/test-url" -hdr "Cookie: PHPSESSID=123456"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Response with PHPSESSID cookie"
 
     # Request with ADMIN cookie - should trigger pass
-    txreq -method "GET" -url "/test-url" -hdr "Cookie: ADMIN=admin123"
+    txreq -req "GET" -url "/test-url" -hdr "Cookie: ADMIN=admin123"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Response with ADMIN cookie"

@@ -44,20 +44,20 @@ barrier b1 sync
 
 client c1 {
     # filling the cache
-    txreq -method "GET" -url "/" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/breathe-easy-tank.html" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/breathe-easy-tank.html" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # soft purge the entire cache
-    txreq -method "PURGE" -url "/" -hdr "X-Magento-Tags-Pattern: .*" -hdr "X-Magento-Purge-Soft: 1"
+    txreq -req "PURGE" -url "/" -hdr "X-Magento-Tags-Pattern: .*" -hdr "X-Magento-Purge-Soft: 1"
     rxresp
     expect resp.status == 200
     expect resp.http.Content-Type == "application/json"
@@ -65,15 +65,15 @@ client c1 {
     expect resp.reason == "OK"
 
     # soft purges cause cache misses
-    txreq -method "GET" -url "/" -hdr "Context: soft purge everything"
+    txreq -req "GET" -url "/" -hdr "Context: soft purge everything"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT-GRACE"
 
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: soft purge everything"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: soft purge everything"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT-GRACE"
 
-    txreq -method "GET" -url "/breathe-easy-tank.html" -hdr "Context: soft purge everything"
+    txreq -req "GET" -url "/breathe-easy-tank.html" -hdr "Context: soft purge everything"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT-GRACE"
 } -run

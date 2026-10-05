@@ -55,20 +55,20 @@ barrier b1 sync
 
 client c1 {
     # filling the cache
-    txreq -method "GET" -url "/" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/breathe-easy-tank.html" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/breathe-easy-tank.html" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # hard purge that affects "/" & "/hero-hoodie.html"
-    txreq -method "PURGE" -url "/" -hdr "X-Magento-Tags-Pattern: ((^|,)cat_p_694(,|$))"
+    txreq -req "PURGE" -url "/" -hdr "X-Magento-Tags-Pattern: ((^|,)cat_p_694(,|$))"
     rxresp
     expect resp.status == 200
     expect resp.http.Content-Type == "application/json"
@@ -76,16 +76,16 @@ client c1 {
     expect resp.reason == "OK"
 
     # hard purges cause cache misses
-    txreq -method "GET" -url "/" -hdr "Context: hard purge cat_p_694"
+    txreq -req "GET" -url "/" -hdr "Context: hard purge cat_p_694"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: hard purge cat_p_694"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: hard purge cat_p_694"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # "/breathe-easy-tank.html" is unaffected
-    txreq -method "GET" -url "/breathe-easy-tank.html" -hdr "Context: soft purge cat_p_694"
+    txreq -req "GET" -url "/breathe-easy-tank.html" -hdr "Context: soft purge cat_p_694"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 

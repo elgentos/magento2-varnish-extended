@@ -57,27 +57,27 @@ varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash"
 barrier b1 sync
 
 client c1 {
-    txreq -method "GET" -url "/"
+    txreq -req "GET" -url "/"
     rxresp
     expect resp.http.Cache-Control == "must-revalidate, max-age=60"
 
-    txreq -method "GET" -url "/media/1"
+    txreq -req "GET" -url "/media/1"
     rxresp
     expect resp.http.Cache-Control == "public, max-age=86400"
 
-    txreq -method "GET" -url "/static/1"
+    txreq -req "GET" -url "/static/1"
     rxresp
     expect resp.http.Cache-Control == "public, max-age=86400"
 
-    txreq -method "GET" -url "/1"
+    txreq -req "GET" -url "/1"
     rxresp
     expect resp.http.Cache-Control == "private, no-cache, no-store"
 
-    txreq -method "GET" -url "/2"
+    txreq -req "GET" -url "/2"
     rxresp
     expect resp.http.Cache-Control == "max-age=0"
 
-    txreq -method "GET" -url "/3"
+    txreq -req "GET" -url "/3"
     rxresp
     expect resp.http.Cache-Control == "public, max-age=3600, s-maxage=0"
 } -run

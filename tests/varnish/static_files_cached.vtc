@@ -38,21 +38,21 @@ barrier b1 sync
 
 client c1 {
     # First request for static file
-    txreq -method "GET" -url "/static/version1234/frontend/Magento/luma/en_US/css/styles.css" -hdr "Host: example.com"
+    txreq -req "GET" -url "/static/version1234/frontend/Magento/luma/en_US/css/styles.css" -hdr "Host: example.com"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.http.Content-Type == "text/css"
     expect resp.body == "/* CSS styles */"
 
     # Second request for the same static file should be served from cache
-    txreq -method "GET" -url "/static/version1234/frontend/Magento/luma/en_US/css/styles.css" -hdr "Host: example.com"
+    txreq -req "GET" -url "/static/version1234/frontend/Magento/luma/en_US/css/styles.css" -hdr "Host: example.com"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.http.Content-Type == "text/css"
     expect resp.body == "/* CSS styles */"
 
     # Request with cookie should still be cached for static files
-    txreq -method "GET" -url "/static/version1234/frontend/Magento/luma/en_US/css/styles.css" -hdr "Host: example.com" -hdr "Cookie: PHPSESSID=123456789"
+    txreq -req "GET" -url "/static/version1234/frontend/Magento/luma/en_US/css/styles.css" -hdr "Host: example.com" -hdr "Cookie: PHPSESSID=123456789"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.http.Content-Type == "text/css"
