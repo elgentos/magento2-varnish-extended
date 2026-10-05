@@ -1,0 +1,94 @@
+{
+  "stores": [
+    { "code": "default", "baseUrl": "${VARNISH_BASE_URL}", "websiteId": 1, "currency": null, "pages": {} }
+  ],
+  "pages": {
+    "home": "/",
+    "category": null,
+    "product": null,
+    "cms": null,
+    "search": "/catalogsearch/result/?q=test",
+    "notFound": "/varnish-test-${random}"
+  },
+  "pageSet": ["home", "category", "product", "cms"],
+  "uncacheablePaths": [
+    "/checkout/cart/",
+    "/checkout/",
+    "/customer/account/",
+    "/wishlist/",
+    "/customer/section/load/?sections=cart",
+    "/health_check.php"
+  ],
+  "adminPath": "/admin/",
+  "privateUrls": [],
+  "conditionalUrls": [],
+  "trackingParamsToAssert": ["gclid", "gad_source", "gad_campaignid", "fbclid", "utm_source", "utm_campaign", "msclkid"],
+  "unknownParam": "_vt",
+  "allowedVaryHeaders": ["accept-encoding"],
+  "strippedResponseHeaders": ["xkey", "expires", "pragma", "x-magento-debug", "x-magento-tags", "x-varnish", "via", "link"],
+  "flags": {
+    "autodetect": true,
+    "bfcache": true,
+    "cache404": true,
+    "mediaCache": false,
+    "staticCache": false,
+    "xkey": false,
+    "softpurge": false,
+    "gracePeriod": 300,
+    "designExceptions": false,
+    "cookieDomain": null,
+    "passOnCookieRegexes": []
+  },
+  "purgeMode": "auto",
+  "fixtures": {
+    "mode": "cli",
+    "customers": [
+      { "key": "a1", "groupId": 1, "websiteId": 1 },
+      { "key": "a2", "groupId": 1, "websiteId": 1 }
+    ],
+    "extraAttributes": {},
+    "purgeProductSku": null,
+    "purgeCategoryId": null
+  },
+  "pii": {
+    "fromFixtures": true,
+    "extraMarkers": [],
+    "checkEncodings": ["raw", "html", "json", "url"]
+  },
+  "normalize": {
+    "stripRegexes": [
+      "nonce=\"[^\"]+\"",
+      "\\b\\d{10,13}\\b",
+      "form_key[\"']?\\s*[:=]\\s*[\"'][^\"']*[\"']",
+      "_vt=[A-Za-z0-9-]+"
+    ],
+    "stripSelectors": []
+  },
+  "loggedInMarkers": [],
+  "priceAssertions": [],
+  "selectors": {
+    "loginEmail": "#email",
+    "loginPassword": "#pass",
+    "loginSubmit": "#send2, form[action*='loginPost'] button[type='submit'], form.form-login button[type='submit']",
+    "logoutLink": "a[href*='customer/account/logout']",
+    "addToCart": "#product-addtocart-button",
+    "miniCartCount": "[data-cart-count], .cart-count, [x-text*='cartItems']",
+    "price": "[data-price-type=finalPrice] .price, .price-final_price .price, .price"
+  },
+  "paths": {
+    "loginPage": "/customer/account/login/",
+    "loginPost": "/customer/account/loginPost/",
+    "logout": "/customer/account/logout/",
+    "sectionLoad": "/customer/section/load/",
+    "graphql": "/graphql",
+    "currencySwitch": "/directory/currency/switch/currency/{code}/",
+    "healthCheck": "/health_check.php"
+  },
+  "timeouts": {
+    "purgePropagationMs": 15000,
+    "sectionLoadMs": 10000
+  },
+  "coalescing": {
+    "parallelRequests": 8
+  }
+}

@@ -18,4 +18,11 @@
                 type="Elgentos\VarnishExtended\Model\Varnish\VCLTemplateLocator"/>
     <preference for="Magento\CacheInvalidate\Model\PurgeCache"
                 type="Elgentos\VarnishExtended\Model\PurgeCache"/>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="elgentos_varnish_test_fixtures" xsi:type="object">Elgentos\VarnishExtended\Console\Command\TestFixturesCommand</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
