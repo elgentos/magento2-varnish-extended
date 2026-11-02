@@ -32,6 +32,15 @@ acl purge {
 }
 
 sub vcl_recv {
+    # Prevent header injection attacks
+    unset req.http.X-Original-URL;
+    unset req.http.X-Rewrite-URL;
+    unset req.http.X-Forwarded-Host;
+    unset req.http.X-Forwarded-Server;
+
+    # Mitigate HTTPoxy vulnerability (CVE-2016-5387)
+    unset req.http.proxy;
+
     # Remove empty query string parameters
     # e.g.: www.example.com/index.html?
     if (req.url ~ "\?$") {
