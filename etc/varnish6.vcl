@@ -258,11 +258,7 @@ sub vcl_backend_response {
     }
 
     # Cache HTTP 200 responses
-{{if enable_404_cache}}
-    if (beresp.status != 200 && beresp.status != 404) {
-{{else}}
-    if (beresp.status != 200) {
-{{/if}}
+    if (beresp.status != 200{{if enable_404_cache}} && beresp.status != 404{{/if}}) {
         set beresp.ttl = 120s;
         set beresp.uncacheable = true;
         return (deliver);
