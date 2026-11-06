@@ -169,8 +169,8 @@ sub vcl_recv {
 
     # Remove all marketing/tracking get parameters to minimize the cache objects
     if (req.url ~ "(\?|&)({{var tracking_parameters}})=") {
-        set req.url = regsuball(req.url, "({{var tracking_parameters}})=[-_A-z0-9+(){}%.]+&?", "");
-        set req.url = regsub(req.url, "[?|&]+$", "");
+        set req.url = regsuball(req.url, "(?<=[?&])({{var tracking_parameters}})=[^&]*&?", "");
+        set req.url = regsub(req.url, "[?&]+$", "");
     }
 
     # Bypass authenticated GraphQL requests without a X-Magento-Cache-Id

@@ -1,0 +1,58 @@
+varnishtest "Marketing parameters only match whole parameter names, not suffixes of other parameters"
+
+barrier b1 cond 2
+
+server s1 {
+    # Probe request
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+    # the probe expects the connection to close
+    close
+    barrier b1 sync
+    accept
+
+    # 'old_gclid' ends in the tracking parameter 'gclid' but must be preserved
+    rxreq
+    expect req.url == "/product?old_gclid=1"
+    txresp -body "Product page response"
+
+    # 'ref_id' ends in the tracking parameter 'ef_id' but must be preserved
+    rxreq
+    expect req.url == "/product?ref_id=123"
+    txresp -body "Product page response"
+} -start
+
+# Generate the VCL file
+shell {
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    export TRACKING_PARAMETERS="gclid|ef_id|utm_source"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -start
+
+# make sure the probe request fired
+barrier b1 sync
+
+client c1 {
+    # Only utm_source is stripped; 'old_gclid' must not be mangled into 'old_'
+    txreq -method "GET" -url "/product?old_gclid=1&utm_source=x"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+
+    txreq -method "GET" -url "/product?old_gclid=1"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+
+    # Only utm_source is stripped; 'ref_id' must not be mangled into 'r'
+    txreq -method "GET" -url "/product?ref_id=123&utm_source=x"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+
+    txreq -method "GET" -url "/product?ref_id=123"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+} -run
