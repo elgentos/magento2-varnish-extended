@@ -38,12 +38,12 @@ barrier b1 sync
 
 client c1 {
     # Initial request
-    txreq -url "/" -method "GET" -hdr "Context: req1"
+    txreq -url "/" -req "GET" -hdr "Context: req1"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # Second request hits the cache
-    txreq -url "/" -method "GET" -hdr "Context: req2"
+    txreq -url "/" -req "GET" -hdr "Context: req2"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
@@ -51,7 +51,7 @@ client c1 {
     delay 1
 
     # Third request triggers a cache miss, because the grace was set to zero
-    txreq -url "/" -method "GET" -hdr "Context: req3"
+    txreq -url "/" -req "GET" -hdr "Context: req3"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 } -run

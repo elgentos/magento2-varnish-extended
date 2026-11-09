@@ -69,56 +69,56 @@ barrier b1 sync
 
 client c1 {
     # 200 OK response - first request (should be a MISS)
-    txreq -method "GET" -url "/status-200"
+    txreq -req "GET" -url "/status-200"
     rxresp
     expect resp.status == 200
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.body == "Status 200 response"
 
     # 200 OK response - second request (should be a HIT, backend does not handle this)
-    txreq -method "GET" -url "/status-200"
+    txreq -req "GET" -url "/status-200"
     rxresp
     expect resp.status == 200
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Status 200 response"
 
     # 404 Not Found response - first request (should be MISS)
-    txreq -method "GET" -url "/status-404"
+    txreq -req "GET" -url "/status-404"
     rxresp
     expect resp.status == 404
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.body == "Status 404 response"
 
     # 404 Not Found response - second request (should be HIT, backend does not handle this)
-    txreq -method "GET" -url "/status-404"
+    txreq -req "GET" -url "/status-404"
     rxresp
     expect resp.status == 404
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Status 404 response"
 
     # 500 Internal Server Error response - first request (should be UNCACHEABLE)
-    txreq -method "GET" -url "/status-500"
+    txreq -req "GET" -url "/status-500"
     rxresp
     expect resp.status == 500
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Status 500 response"
 
     # 500 Internal Server Error response - second request (should be UNCACHEABLE, new backend response)
-    txreq -method "GET" -url "/status-500"
+    txreq -req "GET" -url "/status-500"
     rxresp
     expect resp.status == 500
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Status 500 response 2"
 
     # 301 Moved Permanently response - first request (should be UNCACHEABLE)
-    txreq -method "GET" -url "/status-301"
+    txreq -req "GET" -url "/status-301"
     rxresp
     expect resp.status == 301
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
     expect resp.body == "Status 301 response"
 
     # 301 Moved Permanently response - second request (should be UNCACHEABLE, new backend response)
-    txreq -method "GET" -url "/status-301"
+    txreq -req "GET" -url "/status-301"
     rxresp
     expect resp.status == 301
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"

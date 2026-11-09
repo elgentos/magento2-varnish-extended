@@ -49,33 +49,33 @@ logexpect l1 -v v1 -g request {
 
 client c1 {
     # Initial request without marketing parameters
-    txreq -method "GET" -url "/product"
+    txreq -req "GET" -url "/product"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.body == "Product page response"
 
     # Request with marketing parameters - should be a cache hit
     # because parameters are stripped before hashing
-    txreq -method "GET" -url "/product?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale"
+    txreq -req "GET" -url "/product?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Product page response"
 
     # Request with different marketing parameters - should also be a cache hit
-    txreq -method "GET" -url "/product?utm_source=facebook&utm_medium=social&utm_campaign=summer_sale"
+    txreq -req "GET" -url "/product?utm_source=facebook&utm_medium=social&utm_campaign=summer_sale"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Product page response"
 
     # Request with gclid parameter - should be a cache hit
-    txreq -method "GET" -url "/product?gclid=Cj0KCQjw1aOpBhCOARIsACXYv-cQS7lAhOGa"
+    txreq -req "GET" -url "/product?gclid=Cj0KCQjw1aOpBhCOARIsACXYv-cQS7lAhOGa"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
     expect resp.body == "Product page response"
 
     # Request with multiple marketing parameters and a non-marketing parameter
     # The non-marketing parameter should be preserved and cause a cache miss
-    txreq -method "GET" -url "/product?utm_source=google&color=red&utm_campaign=spring_sale"
+    txreq -req "GET" -url "/product?utm_source=google&color=red&utm_campaign=spring_sale"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
     expect resp.body == "Product page response"

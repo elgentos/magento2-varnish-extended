@@ -49,12 +49,12 @@ logexpect l1 -v v1 -g request {
 
 client c1 {
     # Initial request
-    txreq -url "/" -method "POST"
+    txreq -url "/" -req "POST"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 
     # Second request doesn't hit the cache
-    txreq -url "/" -method "POST"
+    txreq -url "/" -req "POST"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 } -run

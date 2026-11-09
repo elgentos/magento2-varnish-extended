@@ -57,45 +57,45 @@ logexpect l1 -v v1 -g request -q "ReqMethod eq 'PURGE'" {
 
 client c1 {
     # filling the cache
-    txreq -method "GET" -url "/" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: fill the cache"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: fill the cache"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # Purge "/"
-    txreq -method "PURGE" -url "/"
+    txreq -req "PURGE" -url "/"
     rxresp
     expect resp.status == 200
     expect resp.http.Content-Type == "application/json"
     expect resp.body == "{ \"invalidated\": 1 }"
     expect resp.reason == "OK"
 
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: check hit after purge for /"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: check hit after purge for /"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
     # Cache mis after purge
-    txreq -method "GET" -url "/" -hdr "Context: cache miss after purge"
+    txreq -req "GET" -url "/" -hdr "Context: cache miss after purge"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # Purge "/"
-    txreq -method "PURGE" -url "/hero-hoodie.html"
+    txreq -req "PURGE" -url "/hero-hoodie.html"
     rxresp
     expect resp.status == 200
     expect resp.http.Content-Type == "application/json"
     expect resp.body == "{ \"invalidated\": 1 }"
     expect resp.reason == "OK"
 
-    txreq -method "GET" -url "/" -hdr "Context: check hit after purge for /"
+    txreq -req "GET" -url "/" -hdr "Context: check hit after purge for /"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
     # Cache mis after purge
-    txreq -method "GET" -url "/hero-hoodie.html" -hdr "Context: cache miss after purge"
+    txreq -req "GET" -url "/hero-hoodie.html" -hdr "Context: cache miss after purge"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 } -run

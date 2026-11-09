@@ -1,0 +1,56 @@
+# Varnish 6.0 with the vmods the template imports.
+#
+# The official varnish:6.0 image ships only the core vmods, so `import cookie` cannot load
+# and the test suite refuses to start. The 7.x images do bundle varnish-modules, which is
+# why only those can run the suite out of the box.
+#
+# There are no varnish-modules packages for 6.0 either - the varnish60lts repository carries
+# just varnish and varnish-dev - so they are built from source against the varnish-dev that
+# matches the varnish in the base image.
+FROM varnish:6.0
+
+# 0.15.x is the varnish-modules series targeting Varnish 6.0. 0.15.2 is the last release that
+# still compiles against 6.0.18: 0.15.3 breaks on vmod_xkey and 0.15.4 also on vmod_vsthrottle,
+# both using red-black tree macros that 6.0 does not have.
+ARG VARNISH_MODULES_VERSION=0.15.2
+ARG VARNISH_DEV_VERSION=6.0.18-1~bookworm
+
+USER root
+
+RUN set -eux; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update -qq; \
+    apt-get install -y -qq --no-install-recommends curl ca-certificates gnupg; \
+    \
+    # The base image points at the rolling Varnish repository, which now serves 9.x, so
+    # varnish-dev has to come from the 6.0 LTS repository to match the runtime.
+    curl -fsSL https://packagecloud.io/varnishcache/varnish60lts/gpgkey \
+        | gpg --dearmor -o /etc/apt/keyrings/varnish60lts.gpg; \
+    echo "deb [signed-by=/etc/apt/keyrings/varnish60lts.gpg] https://packagecloud.io/varnishcache/varnish60lts/debian bookworm main" \
+        > /etc/apt/sources.list.d/varnish60lts.list; \
+    apt-get update -qq; \
+    apt-get install -y -qq --no-install-recommends \
+        "varnish-dev=${VARNISH_DEV_VERSION}" \
+        build-essential automake autoconf libtool pkg-config python3-docutils; \
+    \
+    curl -fsSL "https://github.com/varnish/varnish-modules/archive/refs/tags/${VARNISH_MODULES_VERSION}.tar.gz" \
+        -o /tmp/varnish-modules.tar.gz; \
+    mkdir -p /tmp/varnish-modules; \
+    tar xzf /tmp/varnish-modules.tar.gz -C /tmp/varnish-modules --strip-components=1; \
+    cd /tmp/varnish-modules; \
+    ./bootstrap; \
+    ./configure --prefix=/usr; \
+    \
+    # The build sets -Werror, and GCC 12 flags several modules this release predates.
+    sed -i '/-Werror/d' src/Makefile; \
+    \
+    # Only the vmods the template imports are built. A full `make` fails on vmod_saintmode,
+    # which is not used here and which no supported varnish-modules release fixes for 6.0.
+    make -C src libvmod_cookie.la libvmod_xkey.la; \
+    install -m 0644 src/.libs/libvmod_cookie.so src/.libs/libvmod_xkey.so /usr/lib/varnish/vmods/; \
+    \
+    cd /; \
+    rm -rf /tmp/varnish-modules /tmp/varnish-modules.tar.gz; \
+    apt-get purge -y -qq build-essential automake autoconf libtool pkg-config varnish-dev; \
+    apt-get autoremove -y -qq; \
+    rm -rf /var/lib/apt/lists/*

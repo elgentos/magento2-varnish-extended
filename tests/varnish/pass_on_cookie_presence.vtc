@@ -66,37 +66,37 @@ barrier b1 sync
 
 client c1 {
     # Bypass the cache when the io.prismic.preview cookie is set
-    txreq -method "GET" -url "/" -hdr "Cookie: io.prismic.preview=y" -hdr "Context: bypass the cache when io.prismic.preview cookie is set"
+    txreq -req "GET" -url "/" -hdr "Cookie: io.prismic.preview=y" -hdr "Context: bypass the cache when io.prismic.preview cookie is set"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 
     # Regular cache miss when no cookie is set
-    txreq -method "GET" -url "/" -hdr "Context: cache miss"
+    txreq -req "GET" -url "/" -hdr "Context: cache miss"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "MISS"
 
     # Cache hit
-    txreq -method "GET" -url "/" -hdr "Context: cache hit"
+    txreq -req "GET" -url "/" -hdr "Context: cache hit"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
     # Cache hit for non-blacklisted cookie
-    txreq -method "GET" -url "/" -hdr "Cookie: ok=y" -hdr "Context: cache hit when using the ok cookie"
+    txreq -req "GET" -url "/" -hdr "Cookie: ok=y" -hdr "Context: cache hit when using the ok cookie"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "HIT"
 
     # Bypass the cache when the test cookie is set
-    txreq -method "GET" -url "/" -hdr "Cookie: test=y" -hdr "Context: bypass the cache when test cookie is set"
+    txreq -req "GET" -url "/" -hdr "Cookie: test=y" -hdr "Context: bypass the cache when test cookie is set"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 
     # Combine cookies to ensure the cache is still bypassed
-    txreq -method "GET" -url "/" -hdr "Cookie: io.prismic.preview=y; test=y" -hdr "Context: bypass the cache when both cookies are set"
+    txreq -req "GET" -url "/" -hdr "Cookie: io.prismic.preview=y; test=y" -hdr "Context: bypass the cache when both cookies are set"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 
     # Combine cookies with a non-blacklisted cookie
-    txreq -method "GET" -url "/" -hdr "Cookie: io.prismic.preview=y; ok=y; test=y" -hdr "Context: bypass the cache when both blacklisted cookies and a non-blacklisted cookie are set"
+    txreq -req "GET" -url "/" -hdr "Cookie: io.prismic.preview=y; ok=y; test=y" -hdr "Context: bypass the cache when both blacklisted cookies and a non-blacklisted cookie are set"
     rxresp
     expect resp.http.X-Magento-Cache-Debug == "UNCACHEABLE"
 } -run
