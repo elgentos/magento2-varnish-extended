@@ -14,10 +14,12 @@ class Notification implements NotificationInterface
 
     public function __construct(
         private readonly FlagManager $flagManager,
-    ) {}
+    ) {
+    }
 
-    public function getIdentity()
+    public function getIdentity(): string
     {
+        return self::VARNISH_MARKETING_PARAMS;
     }
 
     public function isDisplayed(): bool
@@ -33,7 +35,8 @@ class Notification implements NotificationInterface
             ) . '</p>';
     }
 
-    public function getSeverity()
+    public function getSeverity(): int
     {
+        return self::SEVERITY_CRITICAL;
     }
 }
