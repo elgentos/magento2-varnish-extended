@@ -17,7 +17,7 @@ use Laminas\Uri\Uri;
  */
 class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
 {
-    const string HEADER_X_MAGENTO_PURGE_SOFT = 'X-Magento-Purge-Soft';
+    public const string HEADER_X_MAGENTO_PURGE_SOFT = 'X-Magento-Purge-Soft';
 
     /**
      * @var Config

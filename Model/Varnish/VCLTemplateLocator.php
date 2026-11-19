@@ -28,7 +28,9 @@ class VCLTemplateLocator implements VclTemplateLocatorInterface
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly DirectoryList $directoryList
     ) {
-        if (defined('Magento\PageCache\Model\Varnish\VclTemplateLocator::VARNISH_SUPPORTED_VERSION_7')) {
+        if (defined('Magento\PageCache\Model\Varnish\VclTemplateLocator::VARNISH_SUPPORTED_VERSION_7')
+            && defined('Magento\PageCache\Model\Config::VARNISH_7_CONFIGURATION_PATH')
+        ) {
             $this->supportedVarnishVersions[BaseLocator::VARNISH_SUPPORTED_VERSION_7] = BaseConfig::VARNISH_7_CONFIGURATION_PATH;
         }
     }
