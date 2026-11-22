@@ -17,6 +17,8 @@
                         <param__ke><param>_ke</param></param__ke>
                         <param__kx><param>_kx</param></param__kx>
                         <param_campid><param>campid</param></param_campid>
+                        <param_ceneo_cid><param>ceneo_cid</param></param_ceneo_cid>
+                        <param_clickId><param>clickId</param></param_clickId>
                         <param_cof><param>cof</param></param_cof>
                         <param_customid><param>customid</param></param_customid>
                         <param_cx><param>cx</param></param_cx>
@@ -85,10 +87,12 @@
                         <param_sb_referer_host><param>sb_referer_host</param></param_sb_referer_host>
                         <param_ScCid><param>ScCid</param></param_ScCid>
                         <param_si><param>si</param></param_si>
+                        <param_siteurl><param>siteurl</param></param_siteurl>
                         <param_sms_click><param>sms_click</param></param_sms_click>
                         <param_sms_source><param>sms_source</param></param_sms_source>
                         <param_sms_uph><param>sms_uph</param></param_sms_uph>
                         <param_srsltid><param>srsltid</param></param_srsltid>
+                        <param_tduid><param>tduid</param></param_tduid>
                         <param_toolid><param>toolid</param></param_toolid>
                         <param_trk_contact><param>trk_contact</param></param_trk_contact>
                         <param_trk_module><param>trk_module</param></param_trk_module>
