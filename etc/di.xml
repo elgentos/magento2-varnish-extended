@@ -25,4 +25,10 @@
             </argument>
         </arguments>
     </type>
+    <type name="Elgentos\VarnishExtended\Console\Command\TestFixturesCommand">
+        <arguments>
+            <argument name="customerFixtures" xsi:type="object">Elgentos\VarnishExtended\Model\TestFixtures\CustomerFixtures\Proxy</argument>
+            <argument name="entityToucher" xsi:type="object">Elgentos\VarnishExtended\Model\TestFixtures\EntityToucher\Proxy</argument>
+        </arguments>
+    </type>
 </config>
