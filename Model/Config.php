@@ -36,6 +36,10 @@ class Config extends PageCacheConfig
 
     public const XML_PATH_VARNISH_PASS_ON_COOKIE_PRESENCE = 'system/full_page_cache/varnish/pass_on_cookie_presence';
 
+    public const XML_PATH_VARNISH_CUSTOM_VCL_PREPEND_FILE = 'system/full_page_cache/varnish/custom_vcl_prepend_file';
+
+    public const XML_PATH_VARNISH_CUSTOM_VCL_APPEND_FILE = 'system/full_page_cache/varnish/custom_vcl_append_file';
+
     public function __construct(
         ReadFactory $readFactory,
         ScopeConfigInterface $scopeConfig,
@@ -138,5 +142,15 @@ class Config extends PageCacheConfig
     public function getEnable404Cache(): bool
     {
         return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_404_CACHE);
+    }
+
+    public function getCustomVclPrependFile(): string
+    {
+        return (string) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_CUSTOM_VCL_PREPEND_FILE);
+    }
+
+    public function getCustomVclAppendFile(): string
+    {
+        return (string) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_CUSTOM_VCL_APPEND_FILE);
     }
 }

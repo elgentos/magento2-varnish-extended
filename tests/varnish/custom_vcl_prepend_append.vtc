@@ -1,0 +1,64 @@
+varnishtest "Test custom VCL prepend and append"
+
+barrier b1 cond 2
+
+server s1 {
+    # first request will be the probe, handle it and be on our way
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+    # the probe expects the connection to close
+    close
+    barrier b1 sync
+    accept
+
+    rxreq
+    expect req.url == "/"
+    expect req.method == "GET"
+    txresp -hdr "Cache-Control: public, max-age=86400"
+} -start
+
+# Create prepend VCL file with just comments for verification
+shell {
+    cat > "${tmpdir}/prepend.vcl" <<'EOF'
+# Custom prepend VCL
+# This demonstrates prepended VCL logic can be included
+
+EOF
+}
+
+# Create append VCL file with just comments for verification
+shell {
+    cat > "${tmpdir}/append.vcl" <<'EOF'
+
+# Custom append VCL
+# This demonstrates appended VCL logic can be included
+EOF
+}
+
+# Generate the VCL file based on included variables and write it to output.vcl
+shell {
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    export CUSTOM_VCL_PREPEND="$(cat ${tmpdir}/prepend.vcl)"
+    export CUSTOM_VCL_APPEND="$(cat ${tmpdir}/append.vcl)"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash" -start
+
+# make sure the probe request fired
+barrier b1 sync
+
+# Verify that the generated VCL contains the prepend and append content
+shell {
+    grep -q "Custom prepend VCL" "${tmpdir}/output.vcl" || exit 1
+    grep -q "Custom append VCL" "${tmpdir}/output.vcl" || exit 1
+}
+
+client c1 {
+    txreq -method "GET" -url "/"
+    rxresp
+    expect resp.status == 200
+} -run
