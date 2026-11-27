@@ -4,6 +4,7 @@
         <system>
             <full_page_cache>
                 <varnish>
+                    <grace_period>300</grace_period>
                     <enable_bfcache>1</enable_bfcache>
                     <enable_media_cache>0</enable_media_cache>
                     <enable_static_cache>0</enable_static_cache>
