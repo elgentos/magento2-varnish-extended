@@ -114,6 +114,9 @@ sub custom_security_check {
 
 Needs at least Magento 2.4.7 and Varnish 6.4.
 
+For Varnish 7, generate the supplied VCL with `--export-version=6` as shown above. Automatic
+`--export-version=7` template selection is not supported; an explicit `--input-file` can still be used.
+
 If you run into your VCL being generated without curly braces inside `for` and `if` directives, please check if you haven't still applied patch MDVA-4344. If you're running a recent Magento version, this patch isn't needed and breaks generation of the VCL.
 
 ## Running the test suite
@@ -143,3 +146,9 @@ make test_single TEST=purge.vtc
 This will only run the tests inside the `purge.vtc` file, which is the equivalent of running `varnishtest purge.vtc`.
 
 More information about the `varnishtest` program can be found  on the [varnish-cache.org documentation site](https://varnish-cache.org/docs/trunk/reference/varnishtest.html). You will also find information on the [Varnish Test Case syntax](https://varnish-cache.org/docs/trunk/reference/vtc.html).
+
+## Integration tests against a live store (Playwright)
+
+The `varnishtest` files prove the VCL in isolation. The Playwright suite in `tests/playwright` proves the whole chain on a running Magento with Varnish in front. It covers cache key normalization, stripped headers, cookie handling, uncacheable and private endpoints, logged-in sessions and the `X-Magento-Vary` cookie. It also covers leaks of customer data into shared objects, store and currency switches, purges and grace.
+
+The suite is generic. A project adds a small overlay directory with `varnish.config.json`, an optional `hooks.ts` and extra specs. Fixture customers come from the console command `bin/magento varnish:test:fixtures`, which this module ships. See [tests/playwright/README.md](tests/playwright/README.md) for installation, configuration and the test catalog.

@@ -33,7 +33,16 @@
                         </depends>
                     </field>
 
-                    <field id="tracking_parameters" type="text" translate="label comment" sortOrder="33" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <field id="enable_404_cache" translate="label comment" type="select" sortOrder="33" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Enable caching of 404 responses</label>
+                        <comment>When enabled, 404 (Not Found) responses will be cached by Varnish to improve performance for frequently requested non-existent URLs.</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <depends>
+                            <field id="caching_application">1</field>
+                        </depends>
+                    </field>
+
+                    <field id="tracking_parameters" type="text" translate="label comment" sortOrder="35" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Tracking Parameters</label>
                         <comment><![CDATA[Specify tracking parameters to strip off of incoming requests to increase hit rate. See the <a href="https://github.com/mpchadwick/tracking-query-params-registry" target="_new">tracking query parameters registry</a> for a list of known parameters.]]></comment>
                         <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\TrackingParameters</frontend_model>
@@ -43,7 +52,7 @@
                         </depends>
                     </field>
 
-                    <field id="pass_on_cookie_presence" sortOrder="34" translate="label comment" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <field id="pass_on_cookie_presence" sortOrder="36" translate="label comment" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Pass on cookie presence</label>
                         <comment><![CDATA[Regexes to determine whether a request should bypass the cache based on cookie values and be passed directly to the backend.]]></comment>
                         <frontend_model>Elgentos\VarnishExtended\Block\Adminhtml\Form\Field\PassOnCookiePresence</frontend_model>
@@ -52,12 +61,12 @@
                             <field id="caching_application">1</field>
                         </depends>
                     </field>
-                    <field id="use_xkey_vmod" type="select" translate="label comment" sortOrder="35" showInDefault="1">
+                    <field id="use_xkey_vmod" type="select" translate="label comment" sortOrder="37" showInDefault="1">
                         <label>Use Xkey vmod</label>
                         <comment><![CDATA[Varnish Xkey vmod is installed. See <a target="_blank" href="https://github.com/varnish/varnish-modules/blob/master/src/vmod_xkey.vcc">Varnish VMOD xkey</a>.]]></comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                   </field>
-                    <field id="use_soft_purging" type="select" translate="label comment" sortOrder="36" showInDefault="1">
+                    <field id="use_soft_purging" type="select" translate="label comment" sortOrder="38" showInDefault="1">
                         <label>Use soft purging</label>
                         <comment>Use soft purging instead of hard purging. This requires Xkey vmod to be installed</comment>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

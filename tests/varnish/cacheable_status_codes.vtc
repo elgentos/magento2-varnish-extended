@@ -54,10 +54,11 @@ server s1 {
     txresp -status 301 -hdr "Location: /new-location" -body "Status 301 response 2"
 } -start
 
-# Generate the VCL file
+# Generate the VCL file with 404 caching enabled (default behavior)
 shell {
     export s1_addr="${s1_addr}"
     export s1_port="${s1_port}"
+    export ENABLE_404_CACHE="1"
     ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
 }
 

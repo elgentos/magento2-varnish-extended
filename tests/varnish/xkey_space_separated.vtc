@@ -1,0 +1,15 @@
+varnishtest "xkey: normalize to space separated keys"
+
+# Generate the VCL file based on included variables and write it to output.vcl
+shell {
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+# Validate xkey-related lines use space-separated keys
+shell {
+    grep -F 'set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "[^a-zA-Z0-9_-]+" ," ");' "${tmpdir}/output.vcl"
+    grep -F 'set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "(^ *)|( *$)" ,"");' "${tmpdir}/output.vcl"
+    grep -F 'set beresp.http.XKey = regsuball(beresp.http.X-Magento-Tags, "[^a-zA-Z0-9_-]+", " ");' "${tmpdir}/output.vcl"
+    grep -F 'set beresp.http.XKey = regsuball(beresp.http.XKey, "(^ *)|( *$)", "");' "${tmpdir}/output.vcl"
+    grep -F 'set beresp.http.XKey = beresp.http.XKey + " all";' "${tmpdir}/output.vcl"
+}

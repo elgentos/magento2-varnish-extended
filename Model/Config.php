@@ -26,6 +26,8 @@ class Config extends PageCacheConfig
 
     public const XML_PATH_VARNISH_ENABLE_STATIC_CACHE = 'system/full_page_cache/varnish/enable_static_cache';
 
+    public const XML_PATH_VARNISH_ENABLE_404_CACHE = 'system/full_page_cache/varnish/enable_404_cache';
+
     public const XML_PATH_VARNISH_TRACKING_PARAMETERS = 'system/full_page_cache/varnish/tracking_parameters';
 
     public const XML_PATH_VARNISH_USE_XKEY_VMOD = 'system/full_page_cache/varnish/use_xkey_vmod';
@@ -108,7 +110,7 @@ class Config extends PageCacheConfig
 
     public function getAccessList()
     {
-        $accessList = $this->_scopeConfig->getValue(static::XML_VARNISH_PAGECACHE_ACCESS_LIST);
+        $accessList = $this->scopeConfig->getValue(static::XML_VARNISH_PAGECACHE_ACCESS_LIST);
         return array_map('trim', explode(',', $accessList));
     }
 
@@ -135,6 +137,11 @@ class Config extends PageCacheConfig
     public function getEnableStaticCache(): bool
     {
         return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_STATIC_CACHE);
+    }
+
+    public function getEnable404Cache(): bool
+    {
+        return (bool) $this->scopeConfig->getValue(static::XML_PATH_VARNISH_ENABLE_404_CACHE);
     }
 
     public function getCustomVclPrependFile(): string

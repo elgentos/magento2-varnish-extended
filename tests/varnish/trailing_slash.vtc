@@ -1,0 +1,76 @@
+varnishtest "Testing whether trailing slash is stripped off in vcl_hash"
+
+barrier b1 cond 2
+
+server s1 {
+    # Probe request
+    rxreq
+    expect req.url == "/health_check.php"
+    txresp
+
+    close
+
+    barrier b1 sync
+    accept
+
+    # No trailing slash
+    rxreq
+    expect req.url == "/test"
+    txresp
+
+    # Trailing slash
+    rxreq
+    expect req.url == "/test2/"
+    txresp
+
+    # Homepage: don't strip trailing slash
+    rxreq
+    expect req.url == "/"
+    txresp
+} -start
+
+# Generate VCL
+shell {
+    export s1_addr="${s1_addr}"
+    export s1_port="${s1_port}"
+    ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
+}
+
+varnish v1 -arg "-f" -arg "${tmpdir}/output.vcl" -arg "-p" -arg "vsl_mask=+Hash" -start
+
+# Wait for probe
+barrier b1 sync
+
+logexpect l1 -v v1 -g request -i Hash {
+    expect 0 1001 Hash ^/test$
+    expect 0 1001 Hash ^127\.0\.0\.1$
+    expect 0 1003 Hash ^/test$
+    expect 0 1003 Hash ^127\.0\.0\.1$
+    expect 0 1004 Hash ^/test2$
+    expect 0 1004 Hash ^127\.0\.0\.1$
+    expect 0 1006 Hash ^/$
+    expect 0 1006 Hash ^127\.0\.0\.1$
+} -start
+
+
+client c1 {
+    # No trailing slash
+    txreq -url "/test"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "MISS"
+
+    # Trailing slash
+    txreq -url "/test/"
+    rxresp
+    expect resp.http.X-Magento-Cache-Debug == "HIT"
+
+    # Trailing slash
+    txreq -url "/test2/"
+    rxresp
+
+    # Homepage: don't strip trailing slash
+    txreq -url "/"
+    rxresp
+} -run
+
+logexpect l1 -wait

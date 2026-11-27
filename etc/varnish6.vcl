@@ -55,6 +55,7 @@ sub vcl_recv {
     # In case of an unhealthy backend, the original grace is used
     if (std.healthy(req.backend_hint)) {
         set req.grace = {{var grace_period}}s;
+        std.log("Grace period set to {{var grace_period}} seconds for healthy backend");
     }
 
     # Allow cache purge via Ctrl-Shift-R or Cmd-Shift-R for IP's in purge ACL list
@@ -91,9 +92,9 @@ sub vcl_recv {
             }
             return (synth(200, req.http.n-gone));
         } elseif (req.http.X-Magento-Tags-Pattern) {
-            # replace "((^|,)cat_c(,|$))|((^|,)cat_p(,|$))" to be "cat_c,cat_p"
-            set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "[^a-zA-Z0-9_-]+" ,",");
-            set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "(^,*)|(,*$)" ,"");
+            # normalize regex-style tag patterns to a space-separated list, e.g. "cat_c cat_p"
+            set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "[^a-zA-Z0-9_-]+" ," ");
+            set req.http.X-Magento-Tags-Pattern = regsuball(req.http.X-Magento-Tags-Pattern, "(^ *)|( *$)" ,"");
             if (req.http.X-Magento-Purge-Soft) {
                 set req.http.n-gone = xkey.softpurge(req.http.X-Magento-Tags-Pattern);
             } else {
@@ -170,8 +171,8 @@ sub vcl_recv {
 
     # Remove all marketing/tracking get parameters to minimize the cache objects
     if (req.url ~ "(\?|&)({{var tracking_parameters}})=") {
-        set req.url = regsuball(req.url, "({{var tracking_parameters}})=[-_A-z0-9+(){}%.]+&?", "");
-        set req.url = regsub(req.url, "[?|&]+$", "");
+        set req.url = regsuball(req.url, "(?<=[?&])({{var tracking_parameters}})=[^&]*&?", "");
+        set req.url = regsub(req.url, "[?&]+$", "");
     }
 
     # Bypass authenticated GraphQL requests without a X-Magento-Cache-Id
@@ -199,6 +200,19 @@ sub vcl_hash {
     if (req.url ~ "/graphql") {
         call process_graphql_headers;
     }
+
+    # Don't strip trailing slash for the homepage
+    if(req.url == "/") {
+        hash_data(req.url);
+    } else {
+        # Strip trailing slash from URL for cache normalization
+        hash_data(regsub(req.url, "\/$", ""));
+    }
+
+    # Always include the host header in the hash to separate different websites
+    hash_data(req.http.Host);
+
+    return(lookup);
 }
 
 sub process_graphql_headers {
@@ -232,8 +246,10 @@ sub vcl_backend_response {
 
 {{if use_xkey_vmod}}
     if (beresp.http.X-Magento-Tags) {
-        # set comma separated xkey with "all" tag, allowing for fast full purges
-        set beresp.http.XKey = beresp.http.X-Magento-Tags + ",all";
+        # set normalized space separated xkey with "all" tag, allowing for fast full purges
+        set beresp.http.XKey = regsuball(beresp.http.X-Magento-Tags, "[^a-zA-Z0-9_-]+", " ");
+        set beresp.http.XKey = regsuball(beresp.http.XKey, "(^ *)|( *$)", "");
+        set beresp.http.XKey = beresp.http.XKey + " all";
         unset beresp.http.X-Magento-Tags;
     }
 {{/if}}
@@ -244,9 +260,7 @@ sub vcl_backend_response {
     }
 
     # Cache HTTP 200 responses
-    # TODO MAKE CONFIGURABLE whether or not 404's should be cached
-    if (beresp.status != 200 && beresp.status != 404) {
-    #if (beresp.status != 200) {
+    if (beresp.status != 200{{if enable_404_cache}} && beresp.status != 404{{/if}}) {
         set beresp.ttl = 120s;
         set beresp.uncacheable = true;
         return (deliver);

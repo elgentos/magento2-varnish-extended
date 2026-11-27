@@ -10,7 +10,6 @@ use Magento\Framework\Module\Dir;
 use Magento\Framework\Module\Dir\Reader;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Directory\ReadFactory;
-use Magento\PageCache\Model\Config as BaseConfig;
 use Magento\PageCache\Model\VclTemplateLocatorInterface;
 use Magento\PageCache\Exception\UnsupportedVarnishVersion;
 
@@ -27,11 +26,7 @@ class VCLTemplateLocator implements VclTemplateLocatorInterface
         private readonly ReadFactory $readFactory,
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly DirectoryList $directoryList
-    ) {
-        if (defined('Magento\PageCache\Model\Varnish\VclTemplateLocator::VARNISH_SUPPORTED_VERSION_7')) {
-            $this->supportedVarnishVersions[BaseLocator::VARNISH_SUPPORTED_VERSION_7] = BaseConfig::VARNISH_7_CONFIGURATION_PATH;
-        }
-    }
+    ) {}
 
     /**
      * @inheritdoc

@@ -1,0 +1,13 @@
+{
+  "name": "@elgentos/varnish-playwright",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Integration tests for a Magento 2 + Varnish setup, shipped with elgentos/magento2-varnish-extended",
+  "license": "OSL-3.0",
+  "peerDependencies": {
+    "@playwright/test": ">=1.45"
+  },
+  "scripts": {
+    "test": "playwright test"
+  }
+}

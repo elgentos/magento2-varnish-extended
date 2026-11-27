@@ -17,6 +17,7 @@ my %defaults = (
     'ENABLE_BFCACHE' => '1',
     'ENABLE_MEDIA_CACHE' => '1',
     'ENABLE_STATIC_CACHE' => '1',
+    'ENABLE_404_CACHE' => '1',
     'ACCESS_LIST' => 'server1 server2',
     'SERVER1_IP' => $ENV{SERVER1_IP} || $ENV{s1_addr},
     'SERVER2_IP' => '10.0.0.2',

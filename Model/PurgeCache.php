@@ -17,7 +17,7 @@ use Laminas\Uri\Uri;
  */
 class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
 {
-    const string HEADER_X_MAGENTO_PURGE_SOFT = 'X-Magento-Purge-Soft';
+    public const string HEADER_X_MAGENTO_PURGE_SOFT = 'X-Magento-Purge-Soft';
 
     /**
      * @var Config
@@ -63,7 +63,7 @@ class PurgeCache extends \Magento\CacheInvalidate\Model\PurgeCache
      * @param array|string $tags
      * @return bool Return true if successful; otherwise return false
      */
-    public function sendPurgeRequest($tags): bool
+    public function sendPurgeRequest($tags)
     {
         if (is_string($tags)) {
             $tags = [$tags];

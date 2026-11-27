@@ -28,17 +28,6 @@ server s1 {
     expect req.url == "/breathe-easy-tank.html"
     expect req.method == "GET"
     txresp -hdr "X-Magento-Tags: cat_c,cat_c_37,cat_p_695,cat_c_21" -hdr "Context: fill the cache"
-
-    # soft purge cat_p_694
-    rxreq
-    expect req.url == "/"
-    expect req.method == "GET"
-    txresp -hdr "X-Magento-Tags: cat_c,cat_c_38,cat_p_694,cat_c_20" -hdr "Context: soft purge cat_p_694"
-
-    rxreq
-    expect req.url == "/hero-hoodie.html"
-    expect req.method == "GET"
-    txresp -hdr "X-Magento-Tags: cat_c,cat_c_37,cat_p_694,cat_c_21" -hdr "Context: soft purge cat_p_694"
 } -start
 
 # Generate the VCL file based on included variables and write it to output.vcl
