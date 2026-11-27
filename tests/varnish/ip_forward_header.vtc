@@ -25,10 +25,9 @@ server s1 {
 } -start
 
 # Generate the VCL file based on included variables and write it to output.vcl
-# Set up ACL with a single whitelisted IP that is not the test client
+# Set up ACL with whitelisted IPs that are not the test client
 shell {
-    export ACCESS_LIST="whitelisted"
-    export WHITELISTED_IP="10.0.0.1"
+    export SERVER1_IP="10.0.0.1"
     export s1_addr="${s1_addr}"
     export s1_port="${s1_port}"
     ${testdir}/helpers/parse_vcl.pl "${testdir}/../../etc/varnish6.vcl" "${tmpdir}/output.vcl"
