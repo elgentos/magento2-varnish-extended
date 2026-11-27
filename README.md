@@ -64,6 +64,9 @@ Contrary to popular belief, loading & activating ('using') a new VCL does not pu
 
 Needs at least Magento 2.4.7 and Varnish 6.4.
 
+For Varnish 7, generate the supplied VCL with `--export-version=6` as shown above. Automatic
+`--export-version=7` template selection is not supported; an explicit `--input-file` can still be used.
+
 If you run into your VCL being generated without curly braces inside `for` and `if` directives, please check if you haven't still applied patch MDVA-4344. If you're running a recent Magento version, this patch isn't needed and breaks generation of the VCL.
 
 ## Running the test suite
