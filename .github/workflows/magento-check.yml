@@ -20,10 +20,19 @@ jobs:
     timeout-minutes: 5
     permissions: {}
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      matrix: ${{ steps.filter.outputs.matrix }}
     steps:
       - id: matrix
         uses: lbajsarowicz/github-action-magento-matrix@v1
+
+      # composer.json requires PHP ^8.3, so drop the cells for older PHP versions.
+      - id: filter
+        env:
+          MATRIX: ${{ steps.matrix.outputs.matrix }}
+        run: |
+          matrix=$(jq -c '.include |= map(select((.php | split(".") | map(tonumber)) >= [8, 3]))' <<< "$MATRIX")
+          echo "$matrix"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
   check:
     name: "Magento ${{ matrix.magento }} @ PHP ${{ matrix.php }}"
